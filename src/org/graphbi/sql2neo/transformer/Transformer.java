@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.beanutils.DynaBean;
 import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.model.Column;
@@ -25,6 +26,10 @@ public class Transformer {
 
     private static Logger log = Logger.getLogger(Transformer.class);
 
+    /**
+     * Property keys for the Property Graph Model to store some meta about the
+     * origin of the nodes and edges.
+     */
     public static final String ID_KEY = "__id__";
     public static final String TYPE_KEY = "__type__";
     public static final String SOURCE_KEY = "__source__";
@@ -33,6 +38,9 @@ public class Transformer {
     private final Database rDatabase;
     private final Wrapper gDatabase;
     private final String databaseName;
+
+    private long rowCnt;
+    private long linkCnt;
 
     private Map<String, LinkTableInfo> linkTableMap;
 
@@ -43,44 +51,48 @@ public class Transformer {
 	this.gDatabase = graphdb;
 	this.rDatabase = relPlatform.readModelFromDatabase(databaseName);
 	this.linkTableMap = new HashMap<String, LinkTableInfo>();
+
+	this.rowCnt = 0;
+	this.linkCnt = 0;
+
 	for (LinkTableInfo lt : linkTables) {
 	    linkTableMap.put(lt.getLinkTable(), lt);
 	}
     }
 
     public void transform() {
-	log.info("Starting transformation");
+	log.info("Starting transformation pipeline");
+	StopWatch sw = new StopWatch();
+	sw.start();
 
 	// tables
 	transformTables(rDatabase.getTables());
 	// foreign keys (1:n)
 	transformForeignKeys(rDatabase.getTables());
+	// link tables (n:m)
+	transformLinkTables(rDatabase.getTables());
 
-	// iterate all tables and print the content
-	// for (Table t : rdb.getTables()) {
-	// System.out.println(t);
-	// Column[] cols = t.getColumns();
-	// List it = p.fetch(rdb, "SELECT * FROM " + t.getName());
-	// for (Object o : it) {
-	// DynaBean row = (DynaBean) o;
-	// for (Column col : cols) {
-	// System.out.print("\t" + col.getName() + ":"
-	// + row.get(col.getName()));
-	// }
-	// System.out.println();
-	// }
-	// }
-	log.info("Finished transformation");
+	sw.stop();
+	log.info(String
+		.format("Finished transformation pipeline. Processed %d rows and %d links. took %s",
+			rowCnt, linkCnt, sw));
     }
 
+    /**
+     * 
+     * Transforms the rows of a collection of tables.
+     * 
+     * Link tables are not considered.
+     * 
+     * @param tables
+     *            A collection of tables.
+     */
     private void transformTables(final Table... tables) {
 	log.info(String.format("Transforming %d tables", tables.length));
 	StopWatch sw = new StopWatch();
 	sw.start();
 	for (Table t : tables) {
 	    transformTable(t);
-	    // testing, just one row
-	    // break;
 	}
 	sw.stop();
 	log.info(String.format("Finished transforming %d tables, took %s",
@@ -91,9 +103,6 @@ public class Transformer {
      * Transforms all rows of a table into a node in the graph. Primary key
      * columns are concatenated with the corresponding type and used as a node
      * identifier.
-     * 
-     * Foreign keys attributes are also stored and will be removed during the
-     * creation of relationships.
      * 
      * Null values are currently ignored.
      * 
@@ -120,26 +129,19 @@ public class Transformer {
 
 	// store non-pk properties
 	Map<String, Object> properties = null;
-	String primaryKey;
 	DynaBean row;
 
-	// process all rows and create nodes in one transaction
+	// process all rows and create nodes in one tx for better performance
 	gDatabase.beginTransaction();
 
 	while (it.hasNext()) {
 	    row = (DynaBean) it.next();
+	    rowCnt++;
 	    properties = new HashMap<String, Object>();
 	    // meta
 	    properties.put(SOURCE_KEY, databaseName);
 	    properties.put(TYPE_KEY, tableName);
-
-	    // concatenante the primary key
-	    // <relname>_<pk_1>[_<pk_n>]*
-	    primaryKey = tableName;
-	    for (Column c : t.getPrimaryKeyColumns()) {
-		primaryKey += "_" + row.get(c.getName());
-	    }
-	    properties.put(ID_KEY, primaryKey);
+	    properties.put(ID_KEY, getPrimaryKeyNodeValue(t, row));
 
 	    // read all non-pk properties (including foreign keys)
 	    for (Column c : propertyCols) {
@@ -158,15 +160,22 @@ public class Transformer {
 	log.info(String.format("Took %s", sw));
     }
 
+    /**
+     * Transforms the foreign keys of a collection of tables.
+     * 
+     * Link Tables are not considered by this method.
+     * 
+     * @param tables
+     *            A collection of Tables
+     */
     private void transformForeignKeys(final Table... tables) {
-	log.info(String.format("Transforming foreign keys", tables.length));
+	log.info(String.format("Transforming foreign keys of %d tables",
+		tables.length));
 	StopWatch sw = new StopWatch();
 	sw.start();
 	for (Table t : tables) {
 	    if (!linkTableMap.containsKey(t.getName())) {
-		for (ForeignKey fk : t.getForeignKeys()) {
-		    transformForeignKey(fk, t);
-		}
+		transformForeignKeys(t);
 	    }
 	}
 	sw.stop();
@@ -174,22 +183,82 @@ public class Transformer {
 		sw));
     }
 
-    private void transformForeignKey(ForeignKey fk, Table t) {
-	log.info(String.format("Transforming %s of %s", fk, t));
+    /**
+     * Creates all links for the given table.
+     * 
+     * Method iterates the rows of the given table and creates relationships to
+     * foreign rows based on the foreign key information of the table.
+     * 
+     * @param t
+     *            Table whose links shall be created.
+     */
+    @SuppressWarnings("rawtypes")
+    private void transformForeignKeys(final Table t) {
+	log.info(String.format("Transforming foreign keys for %s", t));
 	StopWatch sw = new StopWatch();
 	sw.start();
 
-	List<String> fkCols = new ArrayList<String>();
+	// get the relevant data
+	Iterator it = platform.query(
+		rDatabase,
+		String.format("SELECT %s FROM %s",
+			StringUtils.join(getSelectColumns(t).toArray(), ","),
+			t.getName()));
+	DynaBean row;
+	String pkLocal, pkForeign;
+	Map<String, Object> properties = null;
+	Object rowValue;
 
-	for (Reference ref : fk.getReferences()) {
+	// process the creation of all links in one tx for better performance
+	gDatabase.beginTransaction();
+	while (it.hasNext()) {
+	    row = (DynaBean) it.next();
+	    // create all links for the current row
+	    for (ForeignKey fk : t.getForeignKeys()) {
+		for (Reference r : fk.getReferences()) {
+		    // foreign id is local value (skip null values)
+		    rowValue = row.get(r.getLocalColumnName());
+		    if (rowValue == null) {
+			continue;
+		    }
+		    linkCnt++;
+		    properties = new HashMap<String, Object>();
+		    // local node key
+		    pkLocal = getPrimaryKeyNodeValue(t, row);
+		    // foreign node key
+		    // TODO: think about if this is correct when the referenced
+		    // key is a multi-key
+		    pkForeign = String.format("%s_%s",
+			    fk.getForeignTableName(), rowValue);
+		    properties.put(SOURCE_KEY, databaseName);
+		    properties.put(TYPE_KEY, fk.getName());
+		    properties.put(ID_KEY,
+			    getPrimaryKeyLinkValue(fk, pkLocal, pkForeign));
 
-	    log.info(ref);
+		    gDatabase.createRelationship(pkLocal, pkForeign,
+			    fk.getName(), properties);
+		}
+	    }
 	}
+	gDatabase.successTransaction();
+	gDatabase.finishTransaction();
 
 	sw.stop();
 	log.info(String.format("Took %s", sw));
     }
 
+    private void transformLinkTables(final Table... tables) {
+	// silence is golden
+    }
+
+    /**
+     * Returns a list of columns which define properties in the given table.
+     * This excludes all primary key and foreign key columns.
+     * 
+     * @param t
+     *            Table whose columns shall be retrieved.
+     * @return List of columns of the given table
+     */
     @SuppressWarnings("unchecked")
     private List<Column> getPropertyColumns(final Table t) {
 	Column[] columns = t.getColumns();
@@ -205,5 +274,66 @@ public class Transformer {
 	propertyCols = ListUtils.subtract(propertyCols, fkColumns);
 
 	return propertyCols;
+    }
+
+    /**
+     * Generates the id property for a row inside the graph.
+     * 
+     * <Table.Name>
+     * _<PrimaryKey_1>[_<PrimaryKey_n>]*
+     * 
+     * @param t
+     *            Row's table
+     * @param row
+     *            Row
+     * @return Internally used primary key for the given row.
+     */
+    private String getPrimaryKeyNodeValue(final Table t, final DynaBean row) {
+	String primaryKey = t.getName();
+	for (Column c : t.getPrimaryKeyColumns()) {
+	    primaryKey += "_" + row.get(c.getName());
+	}
+	return primaryKey;
+    }
+
+    /**
+     * Generates the id property for a link between two nodes in the graph.
+     * 
+     * @param fk
+     *            ForeignKey is used for link properties
+     * @param sourceId
+     *            Internal id of the source node
+     * @param targetId
+     *            Internal id of the target node
+     * @return
+     */
+    private String getPrimaryKeyLinkValue(final ForeignKey fk,
+	    final String sourceId, final String targetId) {
+	return String.format("%s_%s_%s", fk.getName(), sourceId, targetId);
+
+    }
+
+    /**
+     * Returns a list of all column names which are needed to build the links of
+     * a table's row. This includes the primary key and the foreign key column
+     * names.
+     * 
+     * @param t
+     *            Table whose relevant columns need to be retrieved.
+     * @return List of column names
+     */
+    private List<String> getSelectColumns(Table t) {
+	List<String> selectColumns = new ArrayList<String>();
+	// add primary key columns (needed to build local primary key)
+	for (Column pkCol : t.getPrimaryKeyColumns()) {
+	    selectColumns.add(pkCol.getName());
+	}
+	// add foreign key columns
+	for (ForeignKey fk : t.getForeignKeys()) {
+	    for (Reference r : fk.getReferences()) {
+		selectColumns.add(r.getLocalColumnName());
+	    }
+	}
+	return selectColumns;
     }
 }

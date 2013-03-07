@@ -86,8 +86,6 @@ public class TransformerApp {
 
 	t.transform();
 
-	// neo4j.printNodes("actor");
-
 	shutdownNeo4j(neo4j);
     }
 }

@@ -2,10 +2,12 @@ package org.graphbi.sql2neo.wrapper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 import org.graphbi.sql2neo.transformer.Transformer;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -16,15 +18,24 @@ import org.neo4j.graphdb.index.Index;
 public class NeoWrapper implements Wrapper {
     private static Logger log = Logger.getLogger(NeoWrapper.class);
 
+    /*
+     * Used to the link insance nodes with reference / type nodes.
+     * 
+     * @author s1ck
+     */
     private static enum RelTypes implements RelationshipType {
-	INSTANCE
+	INSTANCE_OF
     }
 
+    /*
+     * Used in the reference node index to retrieve content.
+     */
     private static final String REFERENCE_KEY = "reference";
 
     private final GraphDatabaseService graphdb;
-    private Index<Node> nodeIndex;
-    private Index<Node> referenceIndex;
+
+    private final Index<Node> nodeIndex;
+    private final Index<Node> referenceIndex;
 
     private Transaction tx;
 
@@ -61,6 +72,12 @@ public class NeoWrapper implements Wrapper {
 	}
     }
 
+    public void rollbackTransaction() {
+	if (tx != null) {
+	    tx.failure();
+	}
+    }
+
     /**
      * Creates a Node based on the given properties. If the reference node for
      * the given type doesn't exist, it will be created and indexed.
@@ -68,34 +85,52 @@ public class NeoWrapper implements Wrapper {
      * @param properties
      *            Properties for the new node.
      */
-    public void createNode(Map<String, Object> properties) {
+    public void createNode(final Map<String, Object> properties) {
 	String type = (String) properties.get(Transformer.TYPE_KEY);
 	Node refNode = getReferenceNode(type);
 	// create node
 	Node node = graphdb.createNode();
 	for (Map.Entry<String, Object> e : properties.entrySet()) {
-	    node.setProperty(e.getKey(), checkSupportedType(e.getValue()));
+	    node.setProperty(e.getKey(), getSupportedType(e.getValue()));
 	}
 	nodeIndex.add(node, Transformer.ID_KEY,
 		properties.get(Transformer.ID_KEY));
 
 	// create edge between refNode and new node
-	refNode.createRelationshipTo(node, RelTypes.INSTANCE);
-	
+	refNode.createRelationshipTo(node, RelTypes.INSTANCE_OF);
+
 	log.debug(String.format("Created Neo4j node: %s", node));
     }
 
-    public void createRelationship(String sourceID, String targetID,
-	    String relType, Map<String, Object> properties) {
-	// TODO Auto-generated method stub
-
+    /**
+     * Creates a link between to given nodes if those node exist.
+     */
+    public void createRelationship(final String sourceID,
+	    final String targetID, final String relType,
+	    final Map<String, Object> properties) {
+	Node source = nodeIndex.get(Transformer.ID_KEY, sourceID).getSingle();
+	Node target = nodeIndex.get(Transformer.ID_KEY, targetID).getSingle();
+	if (source != null && target != null) {
+	    log.debug(String.format("Connecting %s and %s", source, target));
+	    Relationship rel = source.createRelationshipTo(target,
+		    DynamicRelationshipType.withName(relType));
+	    if (properties != null) {
+		for (Entry<String, Object> p : properties.entrySet()) {
+		    rel.setProperty(p.getKey(), getSupportedType(p.getValue()));
+		}
+	    }
+	} else {
+	    log.warn(String.format(
+		    "Either source [%s] or target [%s] node doesn't exist",
+		    sourceID, targetID));
+	}
     }
 
     public void printNodes(String type) {
 	Node refNode = referenceIndex.get(REFERENCE_KEY, type).getSingle();
 	if (refNode != null) {
 	    for (Relationship edge : refNode.getRelationships(
-		    Direction.OUTGOING, RelTypes.INSTANCE)) {
+		    Direction.OUTGOING, RelTypes.INSTANCE_OF)) {
 		System.out.println("\t" + edge.getEndNode());
 	    }
 	}
@@ -114,7 +149,7 @@ public class NeoWrapper implements Wrapper {
 	return refNode;
     }
 
-    private Object checkSupportedType(Object o) {
+    private Object getSupportedType(Object o) {
 	if (o instanceof Boolean || o instanceof Byte || o instanceof Short
 		|| o instanceof Integer || o instanceof Long
 		|| o instanceof Float || o instanceof Double
