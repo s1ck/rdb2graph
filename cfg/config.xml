@@ -5,8 +5,8 @@
 		</links>
 		<linktables>
 			<linktable name="film_actor">
-				<link name="actor" fromTable="film" fromColumn="film_id" toTable="actor"
-					toColumn="actor_id" />
+				<link name="actor" fromTable="film" fromColumn="film_id"
+					toTable="actor" toColumn="actor_id" />
 			</linktable>
 			<linktable name="film_category">
 				<link name="category" fromTable="film" fromColumn="film_id"
@@ -14,5 +14,5 @@
 			</linktable>
 		</linktables>
 	</datasource>
-	<neo4j path="target/db" />
+	<datasink type="neo4j" path="target/db" />
 </config>
