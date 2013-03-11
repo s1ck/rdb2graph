@@ -24,7 +24,7 @@ public class NeoWrapper implements Wrapper {
      * @author s1ck
      */
     private static enum RelTypes implements RelationshipType {
-	INSTANCE_OF
+	INSTANCE
     }
 
     /*
@@ -97,9 +97,14 @@ public class NeoWrapper implements Wrapper {
 		properties.get(Transformer.ID_KEY));
 
 	// create edge between refNode and new node
-	refNode.createRelationshipTo(node, RelTypes.INSTANCE_OF);
+	refNode.createRelationshipTo(node, RelTypes.INSTANCE);
 
 	log.debug(String.format("Created Neo4j node: %s", node));
+    }
+
+    public void createRelationship(final String sourceID,
+	    final String targetID, final String relType) {
+	createRelationship(sourceID, targetID, relType, null);
     }
 
     /**
@@ -130,7 +135,7 @@ public class NeoWrapper implements Wrapper {
 	Node refNode = referenceIndex.get(REFERENCE_KEY, type).getSingle();
 	if (refNode != null) {
 	    for (Relationship edge : refNode.getRelationships(
-		    Direction.OUTGOING, RelTypes.INSTANCE_OF)) {
+		    Direction.OUTGOING, RelTypes.INSTANCE)) {
 		System.out.println("\t" + edge.getEndNode());
 	    }
 	}

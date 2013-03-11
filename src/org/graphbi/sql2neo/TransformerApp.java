@@ -82,7 +82,7 @@ public class TransformerApp {
 	Wrapper neo4j = initNeo4j(path);
 
 	Transformer t = new Transformer(platform, neo4j, ds.getDatabase(),
-		cfg.getLinkTables());
+		cfg.getLinkTableInfos());
 
 	t.transform();
 

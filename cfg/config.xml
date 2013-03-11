@@ -1,16 +1,16 @@
 <config>
 	<datasource type="mysql" db="sakila" host="localhost" port="3306"
 		user="graphbi" password="graphbi">
-		<links>		
+		<links>
 		</links>
 		<linktables>
 			<linktable name="film_actor">
-				<link name="actor" from="fk_film_actor_film" to="fk_film_actor_actor" />
-<!-- 				<link name="film" from="fk_film_actor_actor" to="fk_film_actor_film" /> -->
+				<link name="actor" fromTable="film" fromColumn="film_id" toTable="actor"
+					toColumn="actor_id" />
 			</linktable>
 			<linktable name="film_category">
-				<link name="category" from="fk_film_category_film" to="fk_film_category_category" />
-<!-- 				<link name="film" from="fk_film_category_category" to="fk_film_category_film" /> -->
+				<link name="category" fromTable="film" fromColumn="film_id"
+					toTable="category" toColumn="category_id" />
 			</linktable>
 		</linktables>
 	</datasource>

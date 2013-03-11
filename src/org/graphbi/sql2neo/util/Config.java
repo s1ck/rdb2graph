@@ -48,7 +48,7 @@ public class Config {
 	    Document doc = dBuilder.parse(file);
 
 	    parseDatasource(doc);
-	    parseLinkTables(doc);
+	    parseLinkTableInfos(doc);
 	} catch (ParserConfigurationException e) {
 	    e.printStackTrace();
 	} catch (SAXException e) {
@@ -90,7 +90,7 @@ public class Config {
 	// }
     }
 
-    private void parseLinkTables(Document doc) {
+    private void parseLinkTableInfos(Document doc) {
 	NodeList linkTableList = doc.getElementsByTagName("linktable");
 	log.info(String.format("Parsing %d linktables",
 		linkTableList.getLength()));
@@ -98,26 +98,32 @@ public class Config {
 	Node linkTableNode = null, linkNode = null;
 	Element linkTableElement = null, linkElement = null;
 	LinkTableInfo lt = null;
-	String linkTable = null, linkName = null, fk1 = null, fk2 = null;
+	String linkTableName = null, linkName = null;
+	String fromTable = null, fromColumn = null;
+	String toTable = null, toColumn = null;
 	for (int i = 0; i < linkTableList.getLength(); i++) {
 	    linkTableNode = linkTableList.item(i);
 
 	    if (linkTableNode.getNodeType() == Node.ELEMENT_NODE) {
 		linkTableElement = (Element) linkTableNode;
-		linkTable = linkTableElement.getAttribute("name");
+		linkTableName = linkTableElement.getAttribute("name");
 		linkList = linkTableElement.getChildNodes();
+		lt = new LinkTableInfo(linkTableName);
 		for (int j = 0; j < linkList.getLength(); j++) {
 		    linkNode = linkList.item(j);
 		    if (linkNode.getNodeType() == Node.ELEMENT_NODE) {
 			linkElement = (Element) linkNode;
 			linkName = linkElement.getAttribute("name");
-			fk1 = linkElement.getAttribute("from");
-			fk2 = linkElement.getAttribute("to");
-			lt = new LinkTableInfo(linkTable, linkName, fk1, fk2);
-			linkTables.add(lt);
+			fromTable = linkElement.getAttribute("fromTable");
+			fromColumn = linkElement.getAttribute("fromColumn");
+			toTable = linkElement.getAttribute("toTable");
+			toColumn = linkElement.getAttribute("toColumn");
+			lt.addLinkInfo(new LinkInfo(lt, linkName, fromTable,
+				fromColumn, toTable, toColumn));
 		    }
 		}
 	    }
+	    linkTables.add(lt);
 	}
     }
 
@@ -125,7 +131,7 @@ public class Config {
 	return this.dataSource;
     }
 
-    public List<LinkTableInfo> getLinkTables() {
+    public List<LinkTableInfo> getLinkTableInfos() {
 	return this.linkTables;
     }
 }

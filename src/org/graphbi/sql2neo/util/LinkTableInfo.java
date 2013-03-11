@@ -1,54 +1,36 @@
 package org.graphbi.sql2neo.util;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LinkTableInfo {
 
-    private final String linkTable;
+    private final String name;
 
-    private final String linkName;
+    private List<LinkInfo> links;
 
-    private final String fk1;
-
-    private final String fk2;
-
-    public LinkTableInfo(final String linkTable, final String linkName,
-	    final String fk1, final String fk2) {
-	if (linkTable == null || linkTable.length() == 0) {
+    public LinkTableInfo(final String name) {
+	if (name == null || name.length() == 0) {
 	    throw new IllegalArgumentException("linkName is null or missing");
 	}
-	if (linkName == null || linkName.length() == 0) {
-	    throw new IllegalArgumentException("linkName is null or missing");
-	}
-	if (fk1 == null || fk1.length() == 0) {
-	    throw new IllegalArgumentException("fk1 is null or missing");
-	}
-	if (fk2 == null || fk2.length() == 0) {
-	    throw new IllegalArgumentException("fk2 is null or missing");
-	}
-	this.linkTable = linkTable;
-	this.linkName = linkName;
-	this.fk1 = fk1;
-	this.fk2 = fk2;
+	this.name = name;
+	this.links = new ArrayList<LinkInfo>();
     }
 
-    public String getLinkTable() {
-	return this.linkTable;
+    public String getName() {
+	return this.name;
     }
 
-    public String getLinkName() {
-	return this.linkName;
+    public void addLinkInfo(LinkInfo linkInfo) {
+	links.add(linkInfo);
     }
 
-    public String getFk1() {
-	return this.fk1;
-    }
-
-    public String getFk2() {
-	return this.fk2;
+    public List<LinkInfo> getLinkInfos() {
+	return links;
     }
 
     @Override
     public String toString() {
-	return "LinkTableInfo [linkTable=" + linkTable + ", linkName="
-		+ linkName + ", fk1=" + fk1 + ", fk2=" + fk2 + "]";
+	return "LinkTableInfo [linkTableName=" + name + "]";
     }
 }

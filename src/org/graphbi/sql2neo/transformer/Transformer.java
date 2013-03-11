@@ -17,6 +17,7 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
+import org.graphbi.sql2neo.util.LinkInfo;
 import org.graphbi.sql2neo.util.LinkTableInfo;
 import org.graphbi.sql2neo.wrapper.Wrapper;
 
@@ -55,8 +56,8 @@ public class Transformer {
 	this.rowCnt = 0;
 	this.linkCnt = 0;
 
-	for (LinkTableInfo lt : linkTables) {
-	    linkTableMap.put(lt.getLinkTable(), lt);
+	for (LinkTableInfo linkTable : linkTables) {
+	    linkTableMap.put(linkTable.getName(), linkTable);
 	}
     }
 
@@ -247,8 +248,68 @@ public class Transformer {
 	log.info(String.format("Took %s", sw));
     }
 
+    /**
+     * Transforms a given collection of link tables based on the given LinkTable
+     * Information
+     * 
+     * @param tables
+     *            Collection of tables
+     */
     private void transformLinkTables(final Table... tables) {
-	// silence is golden
+	for (Table t : tables) {
+	    if (linkTableMap.containsKey(t.getName())) {
+		transformLinkTable(t);
+	    }
+	}
+    }
+
+    /**
+     * Creates relationships based on the link information in the given link
+     * table.
+     * 
+     * @param table
+     */
+    @SuppressWarnings("rawtypes")
+    private void transformLinkTable(final Table table) {
+	log.info(String.format("Transforming link table %s", table));
+	StopWatch sw = new StopWatch();
+	sw.start();
+	LinkTableInfo tableInfo = linkTableMap.get(table.getName());
+	List<String> selectColumns = new ArrayList<String>();
+	for (LinkInfo linkInfo : tableInfo.getLinkInfos()) {
+	    selectColumns.add(linkInfo.getFromColumnName());
+	    selectColumns.add(linkInfo.getToColumnName());
+	}
+
+	// get the relevant data
+	Iterator it = platform.query(
+		rDatabase,
+		String.format("SELECT %s FROM %s",
+			StringUtils.join(selectColumns.toArray(), ","),
+			table.getName()));
+	DynaBean row;
+	String pkFrom, pkTo;
+
+	gDatabase.beginTransaction();
+	while (it.hasNext()) {
+	    row = (DynaBean) it.next();
+
+	    for (LinkInfo linkInfo : tableInfo.getLinkInfos()) {
+		pkFrom = String.format("%s_%s", linkInfo.getFromTableName(),
+			row.get(linkInfo.getFromColumnName()));
+		pkTo = String.format("%s_%s", linkInfo.getToTableName(),
+			row.get(linkInfo.getToColumnName()));
+
+		// TODO: read properties for the relationship
+		gDatabase.createRelationship(pkFrom, pkTo,
+			linkInfo.getLinkName());
+		linkCnt++;
+	    }
+	}
+	gDatabase.successTransaction();
+	gDatabase.finishTransaction();
+	sw.stop();
+	log.info(String.format("Took %s", sw));
     }
 
     /**
