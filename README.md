@@ -14,7 +14,7 @@ extended by implementing some predefined interfaces.
 Usage
 -----
 
-Config: copy cfg/sample-config.xml to cfg/config.xml and look inside for details
+Config: copy resources/sample-config.xml to resources/config.xml and look inside for details
 
 Install: `mvn install`
 

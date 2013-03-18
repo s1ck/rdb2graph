@@ -85,10 +85,8 @@ public class TransformerApp {
     }
 
     public static void main(String[] args) throws IOException {
-	if (args.length == 0) {
-	    throw new IllegalArgumentException("missing config path");
-	}
-	Config cfg = new Config(args[0]);
+	Config cfg = new Config(TransformerApp.class.getResource("/config.xml")
+		.getFile());
 	cfg.parse();
 
 	DataSourceInfo ds = cfg.getDataSource();
