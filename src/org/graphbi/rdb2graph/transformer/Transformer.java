@@ -302,7 +302,7 @@ public class Transformer {
 
 		// TODO: read properties for the relationship
 		gDatabase.createRelationship(pkFrom, pkTo,
-			linkInfo.getLinkName());
+			linkInfo.getLinkType());
 		linkCnt++;
 	    }
 	}

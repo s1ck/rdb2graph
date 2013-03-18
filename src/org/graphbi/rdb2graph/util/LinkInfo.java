@@ -4,7 +4,7 @@ public class LinkInfo {
 
     private final LinkTableInfo linkTableInfo;
 
-    private final String linkName;
+    private final String linkType;
 
     private final String fromTableName;
 
@@ -40,7 +40,7 @@ public class LinkInfo {
 		    "toColumnName is null or empty");
 	}
 	this.linkTableInfo = linkTableInfo;
-	this.linkName = linkName;
+	this.linkType = linkName;
 	this.fromTableName = fromTableName;
 	this.fromColumnName = fromColumnName;
 	this.toTableName = toTableName;
@@ -51,8 +51,8 @@ public class LinkInfo {
 	return linkTableInfo;
     }
 
-    public String getLinkName() {
-	return linkName;
+    public String getLinkType() {
+	return linkType;
     }
 
     public String getFromTableName() {
@@ -74,7 +74,7 @@ public class LinkInfo {
     @Override
     public String toString() {
 	return "LinkInfo [linkTableInfo=" + linkTableInfo + ", linkName="
-		+ linkName + ", fromTableName=" + fromTableName
+		+ linkType + ", fromTableName=" + fromTableName
 		+ ", fromColumnName=" + fromColumnName + ", toTableName="
 		+ toTableName + ", toColumnName=" + toColumnName + "]";
     }

@@ -115,7 +115,7 @@ public class Config {
 		    linkNode = linkList.item(j);
 		    if (linkNode.getNodeType() == Node.ELEMENT_NODE) {
 			linkElement = (Element) linkNode;
-			linkName = linkElement.getAttribute("name");
+			linkName = linkElement.getAttribute("type");
 			fromTable = linkElement.getAttribute("fromTable");
 			fromColumn = linkElement.getAttribute("fromColumn");
 			toTable = linkElement.getAttribute("toTable");

@@ -14,6 +14,8 @@ extended by implementing some predefined interfaces.
 Usage
 -----
 
+Config: copy cfg/sample-config.xml to cfg/config.xml and look inside for details
+
 Install: `mvn install`
 
 Run: `mvn exec:java`
@@ -23,4 +25,4 @@ Todo's
 
 * flexible support of different source database systems
 * support of multiple source and target database systems
-* configuration of link names
+* configuration of link types (others than fk-names)
