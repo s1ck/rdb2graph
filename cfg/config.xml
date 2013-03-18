@@ -14,5 +14,5 @@
 			</linktable>
 		</linktables>
 	</datasource>
-	<datasink type="neo4j" path="target/db" />
+	<datasink type="neo4j" path="target/db" drop="true" />
 </config>
