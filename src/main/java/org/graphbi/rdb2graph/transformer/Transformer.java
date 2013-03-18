@@ -60,7 +60,7 @@ public class Transformer {
 	    linkTableMap.put(linkTable.getName(), linkTable);
 	}
     }
-    
+
     public void transform() {
 	log.info("Starting transformation pipeline");
 	StopWatch sw = new StopWatch();
@@ -176,7 +176,9 @@ public class Transformer {
 	sw.start();
 	for (Table t : tables) {
 	    if (!linkTableMap.containsKey(t.getName())) {
-		transformForeignKeys(t);
+		if (t.getForeignKeyCount() > 0) {
+		    transformForeignKeys(t);
+		}
 	    }
 	}
 	sw.stop();
@@ -200,11 +202,10 @@ public class Transformer {
 	sw.start();
 
 	// get the relevant data
-	Iterator it = platform.query(
-		rDatabase,
-		String.format("SELECT %s FROM %s",
-			StringUtils.join(getSelectColumns(t).toArray(), ","),
-			t.getName()));
+	String query = String.format("SELECT %s FROM %s",
+		StringUtils.join(getSelectColumns(t).toArray(), ","),
+		t.getName());	
+	Iterator it = platform.query(rDatabase, query);
 	DynaBean row;
 	String pkLocal, pkForeign;
 	Map<String, Object> properties = null;
