@@ -11,7 +11,7 @@ public class LinkTableInfo {
 
     public LinkTableInfo(final String name) {
 	if (name == null || name.length() == 0) {
-	    throw new IllegalArgumentException("linkName is null or missing");
+	    throw new IllegalArgumentException("linkName is null or empty");
 	}
 	this.name = name;
 	this.links = new ArrayList<LinkInfo>();

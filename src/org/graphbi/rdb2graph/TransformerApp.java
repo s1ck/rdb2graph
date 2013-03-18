@@ -10,6 +10,7 @@ import org.apache.ddlutils.PlatformFactory;
 import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.transformer.Transformer;
 import org.graphbi.rdb2graph.util.Config;
+import org.graphbi.rdb2graph.util.DataSinkInfo;
 import org.graphbi.rdb2graph.util.DataSourceInfo;
 import org.graphbi.rdb2graph.wrapper.NeoWrapper;
 import org.graphbi.rdb2graph.wrapper.Wrapper;
@@ -32,16 +33,16 @@ public class TransformerApp {
 	});
     }
 
-    public static Platform initRDB(DataSourceInfo datasourceInfo) {
+    public static Platform initRDB(DataSourceInfo dataSourceInfo) {
 	DataSource ds = null;
 	Platform p = null;
-	if (datasourceInfo.getType().equals("mysql")) {
+	if (dataSourceInfo.getType().equals("mysql")) {
 	    MysqlDataSource mysqlDs = new MysqlDataSource();
-	    mysqlDs.setServerName(datasourceInfo.getHost());
-	    mysqlDs.setPort(datasourceInfo.getPort());
-	    mysqlDs.setUser(datasourceInfo.getUser());
-	    mysqlDs.setPassword(datasourceInfo.getPassword());
-	    mysqlDs.setDatabaseName(datasourceInfo.getDatabase());
+	    mysqlDs.setServerName(dataSourceInfo.getHost());
+	    mysqlDs.setPort(dataSourceInfo.getPort());
+	    mysqlDs.setUser(dataSourceInfo.getUser());
+	    mysqlDs.setPassword(dataSourceInfo.getPassword());
+	    mysqlDs.setDatabaseName(dataSourceInfo.getDatabase());
 	    ds = (DataSource) mysqlDs;
 	} else {
 	    throw new IllegalArgumentException(
@@ -49,7 +50,7 @@ public class TransformerApp {
 	}
 	p = PlatformFactory.createNewPlatformInstance(ds);
 	log.info(String.format("Initialized %s platform",
-		datasourceInfo.getType()));
+		dataSourceInfo.getType()));
 
 	// would be a nicer generic solution, but the platform doesn't create a
 	// datasource internally
@@ -60,36 +61,44 @@ public class TransformerApp {
 	return p;
     }
 
-    public static Wrapper initNeo4j(String path) {
-	GraphDatabaseService graphdb = new GraphDatabaseFactory()
-		.newEmbeddedDatabase(path);
-	registerShutdownHook(graphdb);
-	log.info("Initialized Neo4j");
-	return new NeoWrapper(graphdb);
-    }
-
-    public static void shutdownNeo4j(Wrapper neo4j) {
-	((NeoWrapper) neo4j).getGraphDB().shutdown();
+    public static Wrapper initGDB(DataSinkInfo dataSinkInfo) {
+	if ("neo4j".equals(dataSinkInfo.getType())) {
+	    if (dataSinkInfo.getDrop()) {
+		try {
+		    log.info(String.format("Dropping Neo4j at %s",
+			    dataSinkInfo.getPath()));
+		    FileUtils
+			    .deleteRecursively(new File(dataSinkInfo.getPath()));
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	    }
+	    GraphDatabaseService graphdb = new GraphDatabaseFactory()
+		    .newEmbeddedDatabase(dataSinkInfo.getPath());
+	    registerShutdownHook(graphdb);
+	    log.info("Initialized Neo4j");
+	    return new NeoWrapper(graphdb);
+	} else {
+	    throw new IllegalArgumentException(
+		    "Only Neo4j is currently supported as datasink");
+	}
     }
 
     public static void main(String[] args) throws IOException {
-	String path = "target/neo4j";
-	Config cfg = new Config("cfg/config.xml");
+	if (args.length == 0) {
+	    throw new IllegalArgumentException("missing config path");
+	}
+	Config cfg = new Config(args[0]);
 	cfg.parse();
 
-	FileUtils.deleteRecursively(new File(path));
-
 	DataSourceInfo ds = cfg.getDataSource();
+	Platform source = initRDB(ds);
 
-	Platform p = initRDB(ds);
+	Wrapper sink = initGDB(cfg.getDataSink());
 
-	Wrapper neo4j = initNeo4j(path);
-
-	Transformer t = new Transformer(p, neo4j, ds.getDatabase(),
+	Transformer t = new Transformer(source, sink, ds.getDatabase(),
 		cfg.getLinkTableInfos());
 
 	t.transform();
-
-	shutdownNeo4j(neo4j);
     }
 }

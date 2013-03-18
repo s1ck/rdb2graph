@@ -23,6 +23,7 @@ public class Config {
     private final File file;
 
     private DataSourceInfo dataSource;
+    private DataSinkInfo dataSink;
     private List<LinkTableInfo> linkTables;
 
     public Config(String cfg) {
@@ -49,6 +50,7 @@ public class Config {
 
 	    parseDatasource(doc);
 	    parseLinkTableInfos(doc);
+	    parseDatasink(doc);
 	} catch (ParserConfigurationException e) {
 	    e.printStackTrace();
 	} catch (SAXException e) {
@@ -63,7 +65,7 @@ public class Config {
     private void parseDatasource(Document doc) {
 	NodeList datasourceList = doc.getElementsByTagName("datasource");
 	int length = datasourceList.getLength();
-	log.info(String.format("Parsing %d datasource", length));
+	log.info(String.format("Parsing %d datasources", length));
 	if (length > 1) {
 	    log.warn("Multiple datasources are currently not supported!");
 	}
@@ -127,8 +129,36 @@ public class Config {
 	}
     }
 
+    private void parseDatasink(Document doc) {
+	NodeList datasinkList = doc.getElementsByTagName("datasink");
+	int length = datasinkList.getLength();
+	log.info(String.format("Parsing %d datasinks", length));
+	if (length > 1) {
+	    log.warn("Multiple datasinks are currently not supported!");
+	}
+	Node dataSinkNode = null;
+	Element dataSinkElement = null;
+
+	String type, path;
+	Boolean drop;
+
+	dataSinkNode = datasinkList.item(0);
+	if (dataSinkNode.getNodeType() == Node.ELEMENT_NODE) {
+	    dataSinkElement = (Element) dataSinkNode;
+	    type = dataSinkElement.getAttribute("type");
+	    path = dataSinkElement.getAttribute("path");
+	    drop = Boolean.parseBoolean(dataSinkElement.getAttribute("drop"));
+
+	    dataSink = new DataSinkInfo(type, path, drop);
+	}
+    }
+
     public DataSourceInfo getDataSource() {
 	return this.dataSource;
+    }
+
+    public DataSinkInfo getDataSink() {
+	return this.dataSink;
     }
 
     public List<LinkTableInfo> getLinkTableInfos() {

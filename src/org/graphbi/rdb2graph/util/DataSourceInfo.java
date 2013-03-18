@@ -6,7 +6,7 @@ public class DataSourceInfo {
 
     private final String host;
 
-    private final int port;
+    private final Integer port;
 
     private final String database;
 
@@ -14,9 +14,27 @@ public class DataSourceInfo {
 
     private final String password;
 
-    public DataSourceInfo(String type, String host, int port, String database,
-	    String user, String password) {
+    public DataSourceInfo(String type, String host, Integer port,
+	    String database, String user, String password) {
 	super();
+	if (type == null || type.length() == 0) {
+	    throw new IllegalArgumentException("type is null or empty");
+	}
+	if (host == null || host.length() == 0) {
+	    throw new IllegalArgumentException("host is null or empty");
+	}
+	if (database == null || database.length() == 0) {
+	    throw new IllegalArgumentException("database is null or empty");
+	}
+	if (port == null) {
+	    throw new IllegalArgumentException("port is null");
+	}
+	if (user == null || user.length() == 0) {
+	    throw new IllegalArgumentException("user is null or empty");
+	}
+	if (password == null || password.length() == 0) {
+	    throw new IllegalArgumentException("password is null or empty");
+	}
 	this.type = type;
 	this.host = host;
 	this.port = port;
@@ -33,7 +51,7 @@ public class DataSourceInfo {
 	return host;
     }
 
-    public int getPort() {
+    public Integer getPort() {
 	return port;
     }
 

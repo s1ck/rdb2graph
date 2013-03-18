@@ -22,22 +22,22 @@ public class LinkInfo {
 	    throw new IllegalArgumentException("linkTable is null");
 	}
 	if (linkName == null || linkName.length() == 0) {
-	    throw new IllegalArgumentException("linkName is null or missing");
+	    throw new IllegalArgumentException("linkName is null or empty");
 	}
 	if (fromTableName == null || fromTableName.length() == 0) {
 	    throw new IllegalArgumentException(
-		    "fromTableName is null or missing");
+		    "fromTableName is null or empty");
 	}
 	if (fromColumnName == null || fromColumnName.length() == 0) {
 	    throw new IllegalArgumentException(
-		    "fromColumnName is null or missing");
+		    "fromColumnName is null or empty");
 	}
 	if (toTableName == null || toTableName.length() == 0) {
-	    throw new IllegalArgumentException("toTableName is null or missing");
+	    throw new IllegalArgumentException("toTableName is null or empty");
 	}
 	if (toColumnName == null || toColumnName.length() == 0) {
 	    throw new IllegalArgumentException(
-		    "toColumnName is null or missing");
+		    "toColumnName is null or empty");
 	}
 	this.linkTableInfo = linkTableInfo;
 	this.linkName = linkName;
