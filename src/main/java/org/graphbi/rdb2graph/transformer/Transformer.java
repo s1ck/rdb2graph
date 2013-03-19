@@ -76,7 +76,7 @@ public class Transformer {
 	sw.start();
 
 	// tables
-//	transformTables(rDatabase.getTables());
+	transformTables(rDatabase.getTables());
 	// foreign keys (1:n)
 	transformForeignKeys(rDatabase.getTables());
 	// link tables (n:m)
