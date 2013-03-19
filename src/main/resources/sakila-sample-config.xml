@@ -1,0 +1,43 @@
+<config>
+	<!-- Definition of the datasource -->
+
+	<!-- type - relational database system (rdbs) identifer (mysql) -->
+	<!-- db - database name -->
+	<!-- host - network connection to rdbs -->
+	<!-- port - network port to rdbs -->
+	<!-- user - database user -->
+	<!-- password - database user's password -->
+	<!-- useSchema - true if schemata shall be supported (<schema>.<table>) -->
+	<!-- useDelimiter - true if delimiters for multi word columns shall be used -->
+	<datasource type="mysql" db="sakila" host="localhost" port="3306"
+		user="graphbi" password="graphbi" useSchema="false" useDelimiter="false">
+		<!-- Links represent foreign key constraints -->
+		<links />
+		<!-- Link tables represent m:n relations in the relational model -->
+		<linktables>
+			<!-- linktable defines, which foreign keys shall be used as a relationship -->
+			<linktable name="film_actor">
+				<!-- Multiple realtionships can be created from one link table. -->
+				<!-- A link represents a single relationship in the graph. -->
+
+				<!-- type - Relationship's type -->
+				<!-- fromTable - Relationship source type -->
+				<!-- fromColumn - Identifier-Key of the source node -->
+				<!-- toTable - Relationships target type -->
+				<!-- toColumn - Identifier-Key of the target node -->
+				<link type="actor" fromTable="film" fromColumn="film_id"
+					toTable="actor" toColumn="actor_id" />
+			</linktable>
+			<linktable name="film_category">
+				<link type="category" fromTable="film" fromColumn="film_id"
+					toTable="category" toColumn="category_id" />
+			</linktable>
+		</linktables>
+	</datasource>
+	<!-- Definition of the datasink (currently not really generic) -->
+
+	<!-- type - graph database identifier (neo4j) -->
+	<!-- path - local path of the graphdb -->
+	<!-- drop - True, if the db shall be removed before insert -->
+	<datasink type="neo4j" path="target/db" drop="true" />
+</config>

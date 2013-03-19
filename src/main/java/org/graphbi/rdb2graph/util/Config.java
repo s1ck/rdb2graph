@@ -20,10 +20,21 @@ import org.xml.sax.SAXException;
 public class Config {
     private static Logger log = Logger.getLogger(Config.class);
 
+    /**
+     * Used for column-, table-, schema-names if "useDelimiter" is set to true
+     */
+    public static final String DELIMITER_OPEN = "\"";
+    public static final String DELIMITER_CLOSE = "\"";
+
+    /**
+     * Used to concatenate schema and table id "useSchema" is set to true
+     */
+    public static final String DELIMITER_CONCAT = ".";
+
     private final File file;
 
-    private DataSourceInfo dataSource;
-    private DataSinkInfo dataSink;
+    private DataSourceInfo dataSourceInfo;
+    private DataSinkInfo dataSinkInfo;
     private List<LinkTableInfo> linkTables;
 
     public Config(String cfg) {
@@ -74,6 +85,7 @@ public class Config {
 
 	String type, host, user, password, database;
 	Integer port;
+	Boolean useSchema = false, useDelimiter = false;
 
 	// for (int i = 0; i < length; i++) {
 	dataSourceNode = datasourceList.item(0);
@@ -85,9 +97,16 @@ public class Config {
 	    user = dataSourceElement.getAttribute("user");
 	    password = dataSourceElement.getAttribute("password");
 	    port = Integer.parseInt(dataSourceElement.getAttribute("port"));
-
-	    dataSource = new DataSourceInfo(type, host, port, database, user,
-		    password);
+	    if (dataSourceElement.hasAttribute("useSchema")) {
+		useSchema = Boolean.parseBoolean(dataSourceElement
+			.getAttribute("useSchema"));
+	    }
+	    if (dataSourceElement.hasAttribute("useDelimiter")) {
+		useDelimiter = Boolean.parseBoolean(dataSourceElement
+			.getAttribute("useDelimiter"));
+	    }
+	    dataSourceInfo = new DataSourceInfo(type, host, port, database,
+		    user, password, useSchema, useDelimiter);
 	}
 	// }
     }
@@ -149,16 +168,16 @@ public class Config {
 	    path = dataSinkElement.getAttribute("path");
 	    drop = Boolean.parseBoolean(dataSinkElement.getAttribute("drop"));
 
-	    dataSink = new DataSinkInfo(type, path, drop);
+	    dataSinkInfo = new DataSinkInfo(type, path, drop);
 	}
     }
 
-    public DataSourceInfo getDataSource() {
-	return this.dataSource;
+    public DataSourceInfo getDataSourceInfo() {
+	return this.dataSourceInfo;
     }
 
-    public DataSinkInfo getDataSink() {
-	return this.dataSink;
+    public DataSinkInfo getDataSinkInfo() {
+	return this.dataSinkInfo;
     }
 
     public List<LinkTableInfo> getLinkTableInfos() {

@@ -14,15 +14,22 @@ extended by implementing some predefined interfaces.
 Usage
 -----
 
-Config: copy resources/sample-config.xml to resources/config.xml and look inside for details
+Config: 
 
-Install: `mvn install`
+* copy resources/sample-config.xml to resources/config.xml and look inside for details
 
-Run: `mvn exec:java`
+Install: 
 
-Todo's
-------
+Microsoft SQL JDBC Driver (in case you haven't installed)
 
-* flexible support of different source database systems
-* support of multiple source and target database systems
-* configuration of link types (others than fk-names)
+* download from [Microsoft](http://msdn.microsoft.com/en-us/sqlserver/aa937724.aspx)
+* unpack sqljdbc4.jar
+* `mvn install:install-file -Dfile=sqljdbc4.jar -DgroupId=com.microsoft.sqlserver -DartifactId=sqljdbc4 -Dversion=3.0 -Dpackaging=jar`
+
+rdb2graph
+
+* `mvn install`
+
+Run: 
+
+* `mvn exec:java`

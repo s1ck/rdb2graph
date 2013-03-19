@@ -17,8 +17,13 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
+import org.graphbi.rdb2graph.util.Config;
+import org.graphbi.rdb2graph.util.DataSinkInfo;
+import org.graphbi.rdb2graph.util.DataSourceInfo;
+import org.graphbi.rdb2graph.util.GDBWrapperFactory;
 import org.graphbi.rdb2graph.util.LinkInfo;
 import org.graphbi.rdb2graph.util.LinkTableInfo;
+import org.graphbi.rdb2graph.util.RDBPlatformFactory;
 import org.graphbi.rdb2graph.wrapper.Wrapper;
 
 import scala.actors.threadpool.Arrays;
@@ -38,19 +43,23 @@ public class Transformer {
     private final Platform platform;
     private final Database rDatabase;
     private final Wrapper gDatabase;
-    private final String databaseName;
+    private final DataSourceInfo dataSourceInfo;
+    private final DataSinkInfo dataSinkInfo;
 
     private long rowCnt;
     private long linkCnt;
 
     private Map<String, LinkTableInfo> linkTableMap;
 
-    public Transformer(Platform relPlatform, Wrapper graphdb,
-	    String databaseName, List<LinkTableInfo> linkTables) {
-	this.databaseName = databaseName;
-	this.platform = relPlatform;
-	this.gDatabase = graphdb;
-	this.rDatabase = relPlatform.readModelFromDatabase(databaseName);
+    public Transformer(DataSourceInfo dataSourceInfo,
+	    DataSinkInfo dataSinkInfo, List<LinkTableInfo> linkTables) {
+	this.dataSourceInfo = dataSourceInfo;
+	this.dataSinkInfo = dataSinkInfo;
+
+	this.platform = RDBPlatformFactory.getInstance(dataSourceInfo);
+	this.gDatabase = GDBWrapperFactory.getInstance(dataSinkInfo);
+	this.rDatabase = platform.readModelFromDatabase(dataSourceInfo
+		.getDatabase());
 	this.linkTableMap = new HashMap<String, LinkTableInfo>();
 
 	this.rowCnt = 0;
@@ -67,7 +76,7 @@ public class Transformer {
 	sw.start();
 
 	// tables
-	transformTables(rDatabase.getTables());
+//	transformTables(rDatabase.getTables());
 	// foreign keys (1:n)
 	transformForeignKeys(rDatabase.getTables());
 	// link tables (n:m)
@@ -107,23 +116,23 @@ public class Transformer {
      * 
      * Null values are currently ignored.
      * 
-     * @param t
+     * @param table
      *            Table to be transformed
      */
     @SuppressWarnings({ "rawtypes" })
-    private void transformTable(final Table t) {
-	log.info(String.format("Transforming %s", t));
+    private void transformTable(final Table table) {
+	log.info(String.format("Transforming %s", table));
 	StopWatch sw = new StopWatch();
 	sw.start();
 
-	String tableName = t.getName();
+	String tableName = getFormattedTableName(table);
 	if (linkTableMap.containsKey(tableName)) {
 	    log.info(String.format("%s is a linktable, skipping", tableName));
 	    return;
 	}
 
 	// subtract the pk- and fk-columns from the whole column set
-	List<Column> propertyCols = getPropertyColumns(t);
+	List<Column> propertyCols = getPropertyColumns(table);
 
 	// get the data
 	Iterator it = platform.query(rDatabase, "SELECT * FROM " + tableName);
@@ -140,9 +149,9 @@ public class Transformer {
 	    rowCnt++;
 	    properties = new HashMap<String, Object>();
 	    // meta
-	    properties.put(SOURCE_KEY, databaseName);
+	    properties.put(SOURCE_KEY, dataSourceInfo.getDatabase());
 	    properties.put(TYPE_KEY, tableName);
-	    properties.put(ID_KEY, getPrimaryKeyNodeValue(t, row));
+	    properties.put(ID_KEY, getPrimaryKeyNodeValue(table, row));
 
 	    // read all non-pk properties (including foreign keys)
 	    for (Column c : propertyCols) {
@@ -175,7 +184,7 @@ public class Transformer {
 	StopWatch sw = new StopWatch();
 	sw.start();
 	for (Table t : tables) {
-	    if (!linkTableMap.containsKey(t.getName())) {
+	    if (!linkTableMap.containsKey(getFormattedTableName(t))) {
 		if (t.getForeignKeyCount() > 0) {
 		    transformForeignKeys(t);
 		}
@@ -192,19 +201,19 @@ public class Transformer {
      * Method iterates the rows of the given table and creates relationships to
      * foreign rows based on the foreign key information of the table.
      * 
-     * @param t
+     * @param table
      *            Table whose links shall be created.
      */
     @SuppressWarnings("rawtypes")
-    private void transformForeignKeys(final Table t) {
-	log.info(String.format("Transforming foreign keys for %s", t));
+    private void transformForeignKeys(final Table table) {
+	log.info(String.format("Transforming foreign keys for %s", table));
 	StopWatch sw = new StopWatch();
 	sw.start();
 
 	// get the relevant data
 	String query = String.format("SELECT %s FROM %s",
-		StringUtils.join(getSelectColumns(t).toArray(), ","),
-		t.getName());	
+		StringUtils.join(getSelectColumns(table).toArray(), ","),
+		getFormattedTableName(table));
 	Iterator it = platform.query(rDatabase, query);
 	DynaBean row;
 	String pkLocal, pkForeign;
@@ -216,7 +225,7 @@ public class Transformer {
 	while (it.hasNext()) {
 	    row = (DynaBean) it.next();
 	    // create all links for the current row
-	    for (ForeignKey fk : t.getForeignKeys()) {
+	    for (ForeignKey fk : table.getForeignKeys()) {
 		for (Reference r : fk.getReferences()) {
 		    // foreign id is local value (skip null values)
 		    rowValue = row.get(r.getLocalColumnName());
@@ -226,13 +235,13 @@ public class Transformer {
 		    linkCnt++;
 		    properties = new HashMap<String, Object>();
 		    // local node key
-		    pkLocal = getPrimaryKeyNodeValue(t, row);
+		    pkLocal = getPrimaryKeyNodeValue(table, row);
 		    // foreign node key
 		    // TODO: think about if this is correct when the referenced
 		    // key is a multi-key
 		    pkForeign = String.format("%s_%s",
 			    fk.getForeignTableName(), rowValue);
-		    properties.put(SOURCE_KEY, databaseName);
+		    properties.put(SOURCE_KEY, dataSourceInfo.getDatabase());
 		    properties.put(TYPE_KEY, fk.getName());
 		    properties.put(ID_KEY,
 			    getPrimaryKeyLinkValue(fk, pkLocal, pkForeign));
@@ -258,7 +267,7 @@ public class Transformer {
      */
     private void transformLinkTables(final Table... tables) {
 	for (Table t : tables) {
-	    if (linkTableMap.containsKey(t.getName())) {
+	    if (linkTableMap.containsKey(getFormattedTableName(t))) {
 		transformLinkTable(t);
 	    }
 	}
@@ -283,11 +292,10 @@ public class Transformer {
 	}
 
 	// get the relevant data
-	Iterator it = platform.query(
-		rDatabase,
-		String.format("SELECT %s FROM %s",
-			StringUtils.join(selectColumns.toArray(), ","),
-			table.getName()));
+	Iterator it = platform.query(rDatabase, String.format(
+		"SELECT %s FROM %s",
+		StringUtils.join(selectColumns.toArray(), ","),
+		getFormattedTableName(table)));
 	DynaBean row;
 	String pkFrom, pkTo;
 
@@ -397,5 +405,33 @@ public class Transformer {
 	    }
 	}
 	return selectColumns;
+    }
+
+    /**
+     * Concatenates schema and table if necessary. Adds delimiters if necessary.
+     * 
+     * @param table
+     * @return
+     */
+    private String getFormattedTableName(final Table table) {
+	StringBuilder sb = new StringBuilder();
+
+	if (dataSourceInfo.getUseSchema()) {
+	    if (dataSourceInfo.getUseDelimiter()) {
+		// "<schema_name>".
+		sb.append(Config.DELIMITER_OPEN + table.getSchema()
+			+ Config.DELIMITER_CLOSE + Config.DELIMITER_CONCAT);
+	    } else {
+		// <schema_name>.
+		sb.append(table.getSchema() + Config.DELIMITER_CONCAT);
+	    }
+	}
+	if (dataSourceInfo.getUseDelimiter()) {
+	    sb.append(Config.DELIMITER_OPEN + table.getName()
+		    + Config.DELIMITER_CLOSE);
+	} else {
+	    sb.append(table.getName());
+	}
+	return sb.toString();
     }
 }
