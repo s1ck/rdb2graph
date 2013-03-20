@@ -212,7 +212,7 @@ public class Transformer {
 
 	// get the relevant data
 	String query = String.format("SELECT %s FROM %s",
-		StringUtils.join(getSelectColumns(table).toArray(), ","),
+		StringUtils.join(getLinkColumns(table).toArray(), ","),
 		getFormattedTableName(table));
 	Iterator it = platform.query(rDatabase, query);
 	DynaBean row;
@@ -392,46 +392,53 @@ public class Transformer {
      *            Table whose relevant columns need to be retrieved.
      * @return List of column names
      */
-    private List<String> getSelectColumns(Table t) {
+    private List<String> getLinkColumns(Table t) {
 	List<String> selectColumns = new ArrayList<String>();
 	// add primary key columns (needed to build local primary key)
 	for (Column pkCol : t.getPrimaryKeyColumns()) {
-	    selectColumns.add(pkCol.getName());
+	    selectColumns.add(addDelimiters(pkCol.getName()));
 	}
 	// add foreign key columns
 	for (ForeignKey fk : t.getForeignKeys()) {
 	    for (Reference r : fk.getReferences()) {
-		selectColumns.add(r.getLocalColumnName());
+		selectColumns.add(addDelimiters(r.getLocalColumnName()));
 	    }
 	}
 	return selectColumns;
     }
 
     /**
-     * Concatenates schema and table if necessary. Adds delimiters if necessary.
+     * Concatenates schema and table if necessary. Delimiters are added if
+     * necessary.
      * 
      * @param table
-     * @return
+     *            The table whose name shall be formatted
+     * @return The formatted table name
      */
     private String getFormattedTableName(final Table table) {
 	StringBuilder sb = new StringBuilder();
 
-	if (dataSourceInfo.getUseSchema()) {
-	    if (dataSourceInfo.getUseDelimiter()) {
-		// "<schema_name>".
-		sb.append(Config.DELIMITER_OPEN + table.getSchema()
-			+ Config.DELIMITER_CLOSE + Config.DELIMITER_CONCAT);
-	    } else {
-		// <schema_name>.
-		sb.append(table.getSchema() + Config.DELIMITER_CONCAT);
-	    }
+	if (dataSourceInfo.getUseSchema() && table.getSchema() != null) {
+	    sb.append(addDelimiters(table.getSchema())
+		    + Config.DELIMITER_CONCAT);
 	}
-	if (dataSourceInfo.getUseDelimiter()) {
-	    sb.append(Config.DELIMITER_OPEN + table.getName()
-		    + Config.DELIMITER_CLOSE);
-	} else {
-	    sb.append(table.getName());
-	}
+	sb.append(addDelimiters(table.getName()));
 	return sb.toString();
+    }
+
+    /**
+     * Adds delimiters to the given string if necessary. Is used for schema,
+     * table and column names.
+     * 
+     * @param s
+     *            A string
+     * @return Formatted string
+     */
+    private String addDelimiters(final String s) {
+	if (dataSourceInfo.getUseDelimiter()) {
+	    return Config.DELIMITER_OPEN + s + Config.DELIMITER_CLOSE;
+	} else {
+	    return s;
+	}
     }
 }
