@@ -218,37 +218,47 @@ public class Transformer {
 	DynaBean row;
 	String pkLocal, pkForeign;
 	Map<String, Object> properties = null;
-	Object rowValue;
+	String foreignIdString;
+	Object tmpValue;
+	int i = 0;
 
 	// process the creation of all links in one tx for better performance
 	gDatabase.beginTransaction();
 	while (it.hasNext()) {
 	    row = (DynaBean) it.next();
 	    // create all links for the current row
+	    // local node key
+	    pkLocal = getPrimaryKeyNodeValue(table, row);
 	    for (ForeignKey fk : table.getForeignKeys()) {
+		foreignIdString = "";
+		i = 0;
+		// concat all relevant IDs
+		// NOTE: cannot use getPrimaryKeyNodeValue() for foreign table
+		// here, because the relevant column values could be null
 		for (Reference r : fk.getReferences()) {
-		    // foreign id is local value (skip null values)
-		    rowValue = row.get(r.getLocalColumnName());
-		    if (rowValue == null) {
-			continue;
+		    tmpValue = row.get(r.getLocalColumnName());
+		    if (tmpValue != null) {
+			if (i > 0) {
+			    foreignIdString += "_";
+			}
+			foreignIdString += tmpValue.toString();
+			i++;
 		    }
-		    linkCnt++;
+		}
+		
+		if (!"".equals(foreignIdString)) {
 		    properties = new HashMap<String, Object>();
-		    // local node key
-		    pkLocal = getPrimaryKeyNodeValue(table, row);
 		    // foreign node key
-		    // TODO: think about if this is correct when the referenced
-		    // key is a multi-key
 		    pkForeign = String.format("%s_%s",
 			    getFormattedTableName(fk.getForeignTable()),
-			    rowValue);
+			    foreignIdString);
 		    properties.put(SOURCE_KEY, dataSourceInfo.getDatabase());
 		    properties.put(TYPE_KEY, fk.getName());
 		    properties.put(ID_KEY,
 			    getPrimaryKeyLinkValue(fk, pkLocal, pkForeign));
-
 		    gDatabase.createRelationship(pkLocal, pkForeign,
 			    fk.getName(), properties);
+		    linkCnt++;
 		}
 	    }
 	}
@@ -350,8 +360,7 @@ public class Transformer {
     /**
      * Generates the id property for a row inside the graph.
      * 
-     * [<schemaName>.<tableName>]
-     * _<PrimaryKey_1>[_<PrimaryKey_n>]*
+     * [<schemaName>.<tableName>] _<PrimaryKey_1>[_<PrimaryKey_n>]*
      * 
      * @param t
      *            Row's table
