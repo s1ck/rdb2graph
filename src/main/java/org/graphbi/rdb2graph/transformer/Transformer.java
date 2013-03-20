@@ -240,7 +240,8 @@ public class Transformer {
 		    // TODO: think about if this is correct when the referenced
 		    // key is a multi-key
 		    pkForeign = String.format("%s_%s",
-			    fk.getForeignTableName(), rowValue);
+			    getFormattedTableName(fk.getForeignTable()),
+			    rowValue);
 		    properties.put(SOURCE_KEY, dataSourceInfo.getDatabase());
 		    properties.put(TYPE_KEY, fk.getName());
 		    properties.put(ID_KEY,
@@ -349,7 +350,7 @@ public class Transformer {
     /**
      * Generates the id property for a row inside the graph.
      * 
-     * <Table.Name>
+     * [<schemaName>.<tableName>]
      * _<PrimaryKey_1>[_<PrimaryKey_n>]*
      * 
      * @param t
@@ -359,7 +360,7 @@ public class Transformer {
      * @return Internally used primary key for the given row.
      */
     private String getPrimaryKeyNodeValue(final Table t, final DynaBean row) {
-	String primaryKey = t.getName();
+	String primaryKey = getFormattedTableName(t);
 	for (Column c : t.getPrimaryKeyColumns()) {
 	    primaryKey += "_" + row.get(c.getName());
 	}
