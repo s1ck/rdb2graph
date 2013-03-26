@@ -21,12 +21,6 @@ public class Config {
     private static Logger log = Logger.getLogger(Config.class);
 
     /**
-     * Used for column-, table-, schema-names if "useDelimiter" is set to true
-     */
-    public static final String DELIMITER_OPEN = "\"";
-    public static final String DELIMITER_CLOSE = "\"";
-
-    /**
      * Used to concatenate schema and table id "useSchema" is set to true
      */
     public static final String DELIMITER_CONCAT = ".";

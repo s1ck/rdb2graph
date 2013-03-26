@@ -47,12 +47,13 @@ public class RDBPlatformFactory {
 	    sqlDS.setDatabaseName(dataSourceInfo.getDatabase());
 	    ds = (DataSource) sqlDS;
 	    p = PlatformFactory.createNewPlatformInstance(ds);
-	    p.setDelimitedIdentifierModeOn(true);
 	} else {
 	    throw new IllegalArgumentException(
 		    "Only MySQL and MSSQL are currently supported");
 	}
-	
+	if (dataSourceInfo.getUseDelimiter()) {
+	    p.setDelimitedIdentifierModeOn(true);
+	}
 	log.info(String.format("Initialized %s platform",
 		dataSourceInfo.getType()));
 	return p;

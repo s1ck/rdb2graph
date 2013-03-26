@@ -18,12 +18,8 @@ import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.util.Config;
-import org.graphbi.rdb2graph.util.DataSinkInfo;
-import org.graphbi.rdb2graph.util.DataSourceInfo;
-import org.graphbi.rdb2graph.util.GDBWrapperFactory;
 import org.graphbi.rdb2graph.util.LinkInfo;
 import org.graphbi.rdb2graph.util.LinkTableInfo;
-import org.graphbi.rdb2graph.util.RDBPlatformFactory;
 import org.graphbi.rdb2graph.wrapper.Wrapper;
 
 import scala.actors.threadpool.Arrays;
@@ -41,30 +37,36 @@ public class Transformer {
     public static final String SOURCE_KEY = "__source__";
 
     private final Platform platform;
-    private final Database rDatabase;
-    private final Wrapper gDatabase;
-    private final DataSourceInfo dataSourceInfo;
-    private final DataSinkInfo dataSinkInfo;
+    private final Database relDatabase;
+    private final Wrapper graphDatabase;
 
     private long rowCnt;
     private long linkCnt;
 
+    private final boolean useSchema;
+    private final boolean useDelimiters;
+
     private Map<String, LinkTableInfo> linkTableMap;
 
-    public Transformer(DataSourceInfo dataSourceInfo,
-	    DataSinkInfo dataSinkInfo, List<LinkTableInfo> linkTables) {
-	this.dataSourceInfo = dataSourceInfo;
-	this.dataSinkInfo = dataSinkInfo;
+    public Transformer(Platform platform, Database relDatabase,
+	    Wrapper graphDatabase, List<LinkTableInfo> linkTables) {
+	this(platform, relDatabase, graphDatabase, linkTables, false, false);
+    }
 
-	this.platform = RDBPlatformFactory.getInstance(dataSourceInfo);
-	this.gDatabase = GDBWrapperFactory.getInstance(dataSinkInfo);
-	this.rDatabase = platform.readModelFromDatabase(dataSourceInfo
-		.getDatabase());
-	this.linkTableMap = new HashMap<String, LinkTableInfo>();
+    public Transformer(Platform platform, Database relDatabase,
+	    Wrapper graphDatabase, List<LinkTableInfo> linkTables,
+	    boolean useSchema, boolean useDelimiters) {
+	this.platform = platform;
+	this.relDatabase = relDatabase;
+	this.graphDatabase = graphDatabase;
 
 	this.rowCnt = 0;
 	this.linkCnt = 0;
 
+	this.useSchema = useSchema;
+	this.useDelimiters = useDelimiters;
+
+	this.linkTableMap = new HashMap<String, LinkTableInfo>();
 	for (LinkTableInfo linkTable : linkTables) {
 	    linkTableMap.put(linkTable.getName(), linkTable);
 	}
@@ -76,11 +78,11 @@ public class Transformer {
 	sw.start();
 
 	// tables
-	transformTables(rDatabase.getTables());
+	transformTables(relDatabase.getTables());
 	// foreign keys (1:n)
-	transformForeignKeys(rDatabase.getTables());
+	transformForeignKeys(relDatabase.getTables());
 	// link tables (n:m)
-	transformLinkTables(rDatabase.getTables());
+	transformLinkTables(relDatabase.getTables());
 
 	sw.stop();
 	log.info(String
@@ -135,21 +137,21 @@ public class Transformer {
 	List<Column> propertyCols = getPropertyColumns(table);
 
 	// get the data
-	Iterator it = platform.query(rDatabase, "SELECT * FROM " + tableName);
+	Iterator it = platform.query(relDatabase, "SELECT * FROM " + tableName);
 
 	// store non-pk properties
 	Map<String, Object> properties = null;
 	DynaBean row;
 
 	// process all rows and create nodes in one tx for better performance
-	gDatabase.beginTransaction();
+	graphDatabase.beginTransaction();
 
 	while (it.hasNext()) {
 	    row = (DynaBean) it.next();
 	    rowCnt++;
 	    properties = new HashMap<String, Object>();
 	    // meta
-	    properties.put(SOURCE_KEY, dataSourceInfo.getDatabase());
+	    properties.put(SOURCE_KEY, relDatabase.getName());
 	    properties.put(TYPE_KEY, tableName);
 	    properties.put(ID_KEY, getPrimaryKeyNodeValue(table, row));
 
@@ -161,10 +163,10 @@ public class Transformer {
 		}
 	    }
 	    // create new node based on the given properties
-	    gDatabase.createNode(properties);
+	    graphDatabase.createNode(properties);
 	}
-	gDatabase.successTransaction();
-	gDatabase.finishTransaction();
+	graphDatabase.successTransaction();
+	graphDatabase.finishTransaction();
 
 	sw.stop();
 	log.info(String.format("Took %s", sw));
@@ -214,7 +216,7 @@ public class Transformer {
 	String query = String.format("SELECT %s FROM %s",
 		StringUtils.join(getLinkColumns(table).toArray(), ","),
 		getFormattedTableName(table));
-	Iterator it = platform.query(rDatabase, query);
+	Iterator it = platform.query(relDatabase, query);
 	DynaBean row;
 	String pkLocal, pkForeign;
 	Map<String, Object> properties = null;
@@ -223,7 +225,7 @@ public class Transformer {
 	int i = 0;
 
 	// process the creation of all links in one tx for better performance
-	gDatabase.beginTransaction();
+	graphDatabase.beginTransaction();
 	while (it.hasNext()) {
 	    row = (DynaBean) it.next();
 	    // create all links for the current row
@@ -245,25 +247,25 @@ public class Transformer {
 			i++;
 		    }
 		}
-		
+
 		if (!"".equals(foreignIdString)) {
 		    properties = new HashMap<String, Object>();
 		    // foreign node key
 		    pkForeign = String.format("%s_%s",
 			    getFormattedTableName(fk.getForeignTable()),
 			    foreignIdString);
-		    properties.put(SOURCE_KEY, dataSourceInfo.getDatabase());
+		    properties.put(SOURCE_KEY, relDatabase.getName());
 		    properties.put(TYPE_KEY, fk.getName());
 		    properties.put(ID_KEY,
 			    getPrimaryKeyLinkValue(fk, pkLocal, pkForeign));
-		    gDatabase.createRelationship(pkLocal, pkForeign,
+		    graphDatabase.createRelationship(pkLocal, pkForeign,
 			    fk.getName(), properties);
 		    linkCnt++;
 		}
 	    }
 	}
-	gDatabase.successTransaction();
-	gDatabase.finishTransaction();
+	graphDatabase.successTransaction();
+	graphDatabase.finishTransaction();
 
 	sw.stop();
 	log.info(String.format("Took %s", sw));
@@ -303,14 +305,14 @@ public class Transformer {
 	}
 
 	// get the relevant data
-	Iterator it = platform.query(rDatabase, String.format(
+	Iterator it = platform.query(relDatabase, String.format(
 		"SELECT %s FROM %s",
 		StringUtils.join(selectColumns.toArray(), ","),
 		getFormattedTableName(table)));
 	DynaBean row;
 	String pkFrom, pkTo;
 
-	gDatabase.beginTransaction();
+	graphDatabase.beginTransaction();
 	while (it.hasNext()) {
 	    row = (DynaBean) it.next();
 
@@ -321,13 +323,13 @@ public class Transformer {
 			row.get(linkInfo.getToColumnName()));
 
 		// TODO: read properties for the relationship
-		gDatabase.createRelationship(pkFrom, pkTo,
+		graphDatabase.createRelationship(pkFrom, pkTo,
 			linkInfo.getLinkType());
 		linkCnt++;
 	    }
 	}
-	gDatabase.successTransaction();
-	gDatabase.finishTransaction();
+	graphDatabase.successTransaction();
+	graphDatabase.finishTransaction();
 	sw.stop();
 	log.info(String.format("Took %s", sw));
     }
@@ -428,7 +430,7 @@ public class Transformer {
     private String getFormattedTableName(final Table table) {
 	StringBuilder sb = new StringBuilder();
 
-	if (dataSourceInfo.getUseSchema() && table.getSchema() != null) {
+	if (useSchema && table.getSchema() != null) {
 	    sb.append(addDelimiters(table.getSchema())
 		    + Config.DELIMITER_CONCAT);
 	}
@@ -445,8 +447,9 @@ public class Transformer {
      * @return Formatted string
      */
     private String addDelimiters(final String s) {
-	if (dataSourceInfo.getUseDelimiter()) {
-	    return Config.DELIMITER_OPEN + s + Config.DELIMITER_CLOSE;
+	if (useDelimiters) {
+	    return platform.getPlatformInfo().getDelimiterToken() + s
+		    + platform.getPlatformInfo().getDelimiterToken();
 	} else {
 	    return s;
 	}
