@@ -32,4 +32,7 @@ rdb2graph
 
 Run: 
 
-* `mvn exec:java`
+* `mvn exec:java` to see the available options
+* `mvn exec:java -Dexec.args="-c config.xml"` to apply your own config xml (default is resources/config.xml)
+* `mvn exec:java -Dexec.args="-e ddl.xml"` to extract the database schema into ddl.xml
+* `mvn exec:java -Dexec.args="-t"` to transform the relational database form source system to target system
