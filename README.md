@@ -36,3 +36,4 @@ Run:
 * `mvn exec:java -Dexec.args="-c config.xml"` to apply your own config xml (default is resources/config.xml)
 * `mvn exec:java -Dexec.args="-e ddl.xml"` to extract the database schema into ddl.xml
 * `mvn exec:java -Dexec.args="-t"` to transform the relational database form source system to target system
+* `mvn exec:java -Dexec.args="-r erpnext-sample-ddl.xml -t"` to read the schema from a local file instead of the live database

@@ -128,12 +128,14 @@ public class NeoWrapper implements Wrapper {
 	    return true;
 	} else {
 	    if (source == null) {
-		log.warn(String.format("Source node [%s] not found in index",
-			sourceID));
+		log.error(String
+			.format("Error during creation of relationship with type '%s': Source node '%s' not found in index",
+				relType, sourceID));
 	    }
 	    if (target == null) {
-		log.warn(String.format("Target node [%s] not found in index",
-			targetID));
+		log.error(String
+			.format("Error during creation of relationship with type '%s': Target node '%s' not found in index",
+				relType, targetID));
 	    }
 	}
 	return false;
