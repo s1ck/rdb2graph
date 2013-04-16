@@ -1,10 +1,5 @@
 package org.graphbi.rdb2graph.util;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import javax.sql.DataSource;
 
 import org.apache.ddlutils.Platform;
@@ -58,5 +53,4 @@ public class RDBPlatformFactory {
 		dataSourceInfo.getType()));
 	return p;
     }
-
 }

@@ -18,8 +18,6 @@ import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.util.Config;
-import org.graphbi.rdb2graph.util.LinkInfo;
-import org.graphbi.rdb2graph.util.LinkTableInfo;
 import org.graphbi.rdb2graph.wrapper.Wrapper;
 
 import scala.actors.threadpool.Arrays;
@@ -46,16 +44,13 @@ public class Transformer {
     private final boolean useSchema;
     private final boolean useDelimiters;
 
-    private Map<String, LinkTableInfo> linkTableMap;
-
     public Transformer(Platform platform, Database relDatabase,
-	    Wrapper graphDatabase, List<LinkTableInfo> linkTables) {
-	this(platform, relDatabase, graphDatabase, linkTables, false, false);
+	    Wrapper graphDatabase) {
+	this(platform, relDatabase, graphDatabase, false, false);
     }
 
     public Transformer(Platform platform, Database relDatabase,
-	    Wrapper graphDatabase, List<LinkTableInfo> linkTables,
-	    boolean useSchema, boolean useDelimiters) {
+	    Wrapper graphDatabase, boolean useSchema, boolean useDelimiters) {
 	this.platform = platform;
 	this.relDatabase = relDatabase;
 	this.graphDatabase = graphDatabase;
@@ -65,11 +60,6 @@ public class Transformer {
 
 	this.useSchema = useSchema;
 	this.useDelimiters = useDelimiters;
-
-	this.linkTableMap = new HashMap<String, LinkTableInfo>();
-	for (LinkTableInfo linkTable : linkTables) {
-	    linkTableMap.put(linkTable.getName(), linkTable);
-	}
     }
 
     public void transform() {
@@ -130,10 +120,6 @@ public class Transformer {
 	sw.start();
 
 	String tableName = getFormattedTableName(table);
-	if (linkTableMap.containsKey(tableName)) {
-	    log.info(String.format("%s is a linktable, skipping", tableName));
-	    return;
-	}
 
 	// subtract the pk- and fk-columns from the whole column set
 	List<Column> propertyCols = getPropertyColumns(table);
@@ -293,13 +279,13 @@ public class Transformer {
      * @param tables
      *            Collection of tables
      */
-    private void transformLinkTables(final Table... tables) {
-	for (Table t : tables) {
-	    if (!t.isIgnored()) {
-		transformLinkTable(t);
-	    }
-	}
-    }
+//    private void transformLinkTables(final Table... tables) {
+//	for (Table t : tables) {
+//	    if (!t.isIgnored()) {
+//		transformLinkTable(t);
+//	    }
+//	}
+//    }
 
     /**
      * Creates relationships based on the link information in the given link
@@ -307,47 +293,47 @@ public class Transformer {
      * 
      * @param table
      */
-    @SuppressWarnings("rawtypes")
-    private void transformLinkTable(final Table table) {
-	log.info(String.format("Transforming link table %s", table));
-	StopWatch sw = new StopWatch();
-	sw.start();
-	LinkTableInfo tableInfo = linkTableMap.get(table.getName());
-	List<String> selectColumns = new ArrayList<String>();
-	for (LinkInfo linkInfo : tableInfo.getLinkInfos()) {
-	    selectColumns.add(linkInfo.getFromColumnName());
-	    selectColumns.add(linkInfo.getToColumnName());
-	}
-
-	// get the relevant data
-	Iterator it = platform.query(relDatabase, String.format(
-		"SELECT %s FROM %s",
-		StringUtils.join(selectColumns.toArray(), ","),
-		getFormattedTableName(table)));
-	DynaBean row;
-	String pkFrom, pkTo;
-
-	graphDatabase.beginTransaction();
-	while (it.hasNext()) {
-	    row = (DynaBean) it.next();
-
-	    for (LinkInfo linkInfo : tableInfo.getLinkInfos()) {
-		pkFrom = String.format("%s_%s", linkInfo.getFromTableName(),
-			row.get(linkInfo.getFromColumnName()));
-		pkTo = String.format("%s_%s", linkInfo.getToTableName(),
-			row.get(linkInfo.getToColumnName()));
-
-		// TODO: read properties for the relationship
-		graphDatabase.createRelationship(pkFrom, pkTo,
-			linkInfo.getLinkType());
-		linkCnt++;
-	    }
-	}
-	graphDatabase.successTransaction();
-	graphDatabase.finishTransaction();
-	sw.stop();
-	log.info(String.format("Took %s", sw));
-    }
+//    @SuppressWarnings("rawtypes")
+//    private void transformLinkTable(final Table table) {
+//	log.info(String.format("Transforming link table %s", table));
+//	StopWatch sw = new StopWatch();
+//	sw.start();
+//	LinkTableInfo tableInfo = linkTableMap.get(table.getName());
+//	List<String> selectColumns = new ArrayList<String>();
+//	for (LinkInfo linkInfo : tableInfo.getLinkInfos()) {
+//	    selectColumns.add(linkInfo.getFromColumnName());
+//	    selectColumns.add(linkInfo.getToColumnName());
+//	}
+//
+//	// get the relevant data
+//	Iterator it = platform.query(relDatabase, String.format(
+//		"SELECT %s FROM %s",
+//		StringUtils.join(selectColumns.toArray(), ","),
+//		getFormattedTableName(table)));
+//	DynaBean row;
+//	String pkFrom, pkTo;
+//
+//	graphDatabase.beginTransaction();
+//	while (it.hasNext()) {
+//	    row = (DynaBean) it.next();
+//
+//	    for (LinkInfo linkInfo : tableInfo.getLinkInfos()) {
+//		pkFrom = String.format("%s_%s", linkInfo.getFromTableName(),
+//			row.get(linkInfo.getFromColumnName()));
+//		pkTo = String.format("%s_%s", linkInfo.getToTableName(),
+//			row.get(linkInfo.getToColumnName()));
+//
+//		// TODO: read properties for the relationship
+//		graphDatabase.createRelationship(pkFrom, pkTo,
+//			linkInfo.getLinkType());
+//		linkCnt++;
+//	    }
+//	}
+//	graphDatabase.successTransaction();
+//	graphDatabase.finishTransaction();
+//	sw.stop();
+//	log.info(String.format("Took %s", sw));
+//    }
 
     /**
      * Returns a list of columns which define properties in the given table.
@@ -490,7 +476,8 @@ public class Transformer {
      * for this table, this will be returned, else the table's name will be used
      * as an identifier.
      * 
-     * @param t The table.
+     * @param t
+     *            The table.
      * @return The table's identifier.
      */
     private String getTableIdentifier(Table t) {
@@ -502,7 +489,8 @@ public class Transformer {
      * defined for this foreign key, this will be returned, else the forein
      * key's name will be used as an identifier.
      * 
-     * @param fk The foreign key.
+     * @param fk
+     *            The foreign key.
      * @return The foreign key's identifier.
      */
     private String getForeignKeyIdentifier(ForeignKey fk) {

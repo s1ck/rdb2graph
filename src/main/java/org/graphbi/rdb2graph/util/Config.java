@@ -3,8 +3,6 @@ package org.graphbi.rdb2graph.util;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,7 +27,6 @@ public class Config {
 
     private DataSourceInfo dataSourceInfo;
     private DataSinkInfo dataSinkInfo;
-    private List<LinkTableInfo> linkTables;
 
     public Config(String cfg) {
 	if (cfg == null || cfg.length() == 0) {
@@ -41,7 +38,6 @@ public class Config {
 		    "File %s does not exist", cfg));
 	}
 	this.file = f;
-	this.linkTables = new ArrayList<LinkTableInfo>();
     }
 
     public void parse() {
@@ -54,7 +50,6 @@ public class Config {
 	    Document doc = dBuilder.parse(file);
 
 	    parseDatasource(doc);
-	    parseLinkTableInfos(doc);
 	    parseDatasink(doc);
 	} catch (ParserConfigurationException e) {
 	    e.printStackTrace();
@@ -105,43 +100,6 @@ public class Config {
 	// }
     }
 
-    private void parseLinkTableInfos(Document doc) {
-	NodeList linkTableList = doc.getElementsByTagName("linktable");
-	log.info(String.format("Parsing %d linktables",
-		linkTableList.getLength()));
-	NodeList linkList = null;
-	Node linkTableNode = null, linkNode = null;
-	Element linkTableElement = null, linkElement = null;
-	LinkTableInfo lt = null;
-	String linkTableName = null, linkName = null;
-	String fromTable = null, fromColumn = null;
-	String toTable = null, toColumn = null;
-	for (int i = 0; i < linkTableList.getLength(); i++) {
-	    linkTableNode = linkTableList.item(i);
-
-	    if (linkTableNode.getNodeType() == Node.ELEMENT_NODE) {
-		linkTableElement = (Element) linkTableNode;
-		linkTableName = linkTableElement.getAttribute("name");
-		linkList = linkTableElement.getChildNodes();
-		lt = new LinkTableInfo(linkTableName);
-		for (int j = 0; j < linkList.getLength(); j++) {
-		    linkNode = linkList.item(j);
-		    if (linkNode.getNodeType() == Node.ELEMENT_NODE) {
-			linkElement = (Element) linkNode;
-			linkName = linkElement.getAttribute("type");
-			fromTable = linkElement.getAttribute("fromTable");
-			fromColumn = linkElement.getAttribute("fromColumn");
-			toTable = linkElement.getAttribute("toTable");
-			toColumn = linkElement.getAttribute("toColumn");
-			lt.addLinkInfo(new LinkInfo(lt, linkName, fromTable,
-				fromColumn, toTable, toColumn));
-		    }
-		}
-	    }
-	    linkTables.add(lt);
-	}
-    }
-
     private void parseDatasink(Document doc) {
 	NodeList datasinkList = doc.getElementsByTagName("datasink");
 	int length = datasinkList.getLength();
@@ -172,9 +130,5 @@ public class Config {
 
     public DataSinkInfo getDataSinkInfo() {
 	return this.dataSinkInfo;
-    }
-
-    public List<LinkTableInfo> getLinkTableInfos() {
-	return this.linkTables;
     }
 }

@@ -126,7 +126,7 @@ public class TransformerApp {
 	// transform is necessary
 	if (cmd.hasOption(TRANSFORM_OPTION)) {
 	    Transformer t = new Transformer(rdbs, rDatabase, gdbs,
-		    cfg.getLinkTableInfos(), dataSourceInfo.getUseSchema(),
+		    dataSourceInfo.getUseSchema(),
 		    dataSourceInfo.getUseDelimiter());
 
 	    t.transform();
