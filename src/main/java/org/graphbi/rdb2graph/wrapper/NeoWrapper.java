@@ -125,9 +125,14 @@ public class NeoWrapper implements Wrapper {
 		}
 	    }
 	} else {
-	    log.warn(String.format(
-		    "Either source [%s] or target [%s] node doesn't exist",
-		    sourceID, targetID));
+	    if (source == null) {
+		log.warn(String.format("Source node [%s] not found in index",
+			sourceID));
+	    }
+	    if (target == null) {
+		log.warn(String.format("Target node [%s] not found in index",
+			targetID));
+	    }
 	}
     }
 

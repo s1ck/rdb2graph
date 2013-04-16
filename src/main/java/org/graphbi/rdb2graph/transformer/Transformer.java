@@ -1,13 +1,17 @@
 package org.graphbi.rdb2graph.transformer;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.DynaBean;
+import org.apache.commons.collections.Closure;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
+import org.apache.commons.collections.TransformerUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.ddlutils.Platform;
@@ -135,9 +139,17 @@ public class Transformer {
 
 	// subtract the pk- and fk-columns from the whole column set
 	List<Column> propertyCols = getPropertyColumns(table);
+	
+	// get a list of all columns in the model to query
+	List<String> colNames = new ArrayList<String>();
+	for (Column col : table.getColumns()) {
+	    colNames.add(getFormattedColumnName(col));
+	}
 
 	// get the data
-	Iterator it = platform.query(relDatabase, "SELECT * FROM " + tableName);
+	Iterator it = platform.query(relDatabase, String.format(
+		"SELECT %s FROM %s",
+		StringUtils.join(colNames.iterator(), ","), tableName));
 
 	// store non-pk properties
 	Map<String, Object> properties = null;
@@ -152,7 +164,7 @@ public class Transformer {
 	    properties = new HashMap<String, Object>();
 	    // meta
 	    properties.put(SOURCE_KEY, relDatabase.getName());
-	    properties.put(TYPE_KEY, tableName);
+	    properties.put(TYPE_KEY, table.getName());
 	    properties.put(ID_KEY, getPrimaryKeyNodeValue(table, row));
 
 	    // read all non-pk properties (including foreign keys)
@@ -214,7 +226,7 @@ public class Transformer {
 
 	// get the relevant data
 	String query = String.format("SELECT %s FROM %s",
-		StringUtils.join(getLinkColumns(table).toArray(), ","),
+		StringUtils.join(getLinkColumns(table).iterator(), ","),
 		getFormattedTableName(table));
 	Iterator it = platform.query(relDatabase, query);
 	DynaBean row;
@@ -251,9 +263,8 @@ public class Transformer {
 		if (!"".equals(foreignIdString)) {
 		    properties = new HashMap<String, Object>();
 		    // foreign node key
-		    pkForeign = String.format("%s_%s",
-			    getFormattedTableName(fk.getForeignTable()),
-			    foreignIdString);
+		    pkForeign = String.format("%s_%s", formatKeyCandidate(fk
+			    .getForeignTable().getName()), foreignIdString);
 		    properties.put(SOURCE_KEY, relDatabase.getName());
 		    properties.put(TYPE_KEY, fk.getName());
 		    properties.put(ID_KEY,
@@ -371,7 +382,7 @@ public class Transformer {
      * @return Internally used primary key for the given row.
      */
     private String getPrimaryKeyNodeValue(final Table t, final DynaBean row) {
-	String primaryKey = getFormattedTableName(t);
+	String primaryKey = formatKeyCandidate(t.getName());
 	for (Column c : t.getPrimaryKeyColumns()) {
 	    primaryKey += "_" + row.get(c.getName());
 	}
@@ -438,6 +449,10 @@ public class Transformer {
 	return sb.toString();
     }
 
+    private String getFormattedColumnName(final Column column) {
+	return addDelimiters(column.getName());
+    }
+
     /**
      * Adds delimiters to the given string if necessary. Is used for schema,
      * table and column names.
@@ -453,5 +468,9 @@ public class Transformer {
 	} else {
 	    return s;
 	}
+    }
+
+    private String formatKeyCandidate(String keyCandidate) {
+	return keyCandidate.toLowerCase().replaceAll(" ", "_");
     }
 }

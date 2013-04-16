@@ -24,7 +24,7 @@ Microsoft SQL JDBC Driver (in case you haven't installed)
 
 * download from [Microsoft](http://msdn.microsoft.com/en-us/sqlserver/aa937724.aspx)
 * unpack sqljdbc4.jar
-* `mvn install:install-file -Dfile=sqljdbc4.jar -DgroupId=com.microsoft.sqlserver -DartifactId=sqljdbc4 -Dversion=3.0 -Dpackaging=jar`
+* `mvn install:install-file -Dfile=sqljdbc4.jar -DgroupId=com.microsoft.sqlserver -DartifactId=sqljdbc4 -Dversion=4.0 -Dpackaging=jar`
 
 rdb2graph
 

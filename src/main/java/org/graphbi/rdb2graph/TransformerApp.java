@@ -35,6 +35,8 @@ public class TransformerApp {
     private static final String HELP_LONG_OPT = "help";
     private static final String EXTRACT_OPTION = "e";
     private static final String EXTRACT_LONG_OPT = "extract";
+    private static final String READ_OPTION = "r";
+    private static final String READ_LONG_OPT = "read";
     private static final String TRANSFORM_OPTION = "t";
     private static final String TRANSFORM_LONG_OPT = "transform";
 
@@ -52,6 +54,10 @@ public class TransformerApp {
 		.withDescription("extract ddl into given file")
 		.withLongOpt(EXTRACT_LONG_OPT).create(EXTRACT_OPTION);
 
+	Option read = OptionBuilder.withArgName("file").hasArg()
+		.withDescription("read ddl from file")
+		.withLongOpt(READ_LONG_OPT).create(READ_OPTION);
+
 	Option transform = OptionBuilder
 		.hasArg(false)
 		.withDescription(
@@ -61,6 +67,7 @@ public class TransformerApp {
 	options.addOption(help);
 	options.addOption(config);
 	options.addOption(extract);
+	options.addOption(read);
 	options.addOption(transform);
     }
 
@@ -68,6 +75,13 @@ public class TransformerApp {
 	log.info(String.format("Writing database %s to file %s", db.getName(),
 		fileName));
 	new DatabaseIO().write(db, fileName);
+    }
+
+    public static Database readDatabaseFromXML(String fileName) {
+	log.info(String
+		.format("Reading database schema from file %s", fileName));
+	return new DatabaseIO().read(TransformerApp.class.getResource(
+		"/" + fileName).getFile());
     }
 
     public static void main(String[] args) throws IOException, ParseException {
@@ -90,10 +104,19 @@ public class TransformerApp {
 	DataSourceInfo dataSourceInfo = cfg.getDataSourceInfo();
 	DataSinkInfo dataSinkInfo = cfg.getDataSinkInfo();
 
-	Platform platform = RDBPlatformFactory.getInstance(dataSourceInfo);
-	Wrapper gDatabase = GDBWrapperFactory.getInstance(dataSinkInfo);
-	Database rDatabase = platform.readModelFromDatabase(dataSourceInfo
-		.getDatabase());
+	// set up relational database system
+	Platform rdbs = RDBPlatformFactory.getInstance(dataSourceInfo);
+	// set up graph database system
+	Wrapper gdbs = GDBWrapperFactory.getInstance(dataSinkInfo);
+
+	// set up relational database model (from live sys or from file)
+	Database rDatabase;
+	if (cmd.hasOption(READ_OPTION)) {
+	    rDatabase = readDatabaseFromXML(cmd.getOptionValue(READ_OPTION));
+	} else {
+	    rDatabase = rdbs
+		    .readModelFromDatabase(dataSourceInfo.getDatabase());
+	}
 
 	// write ddl if necessary
 	if (cmd.hasOption(EXTRACT_OPTION)) {
@@ -102,7 +125,7 @@ public class TransformerApp {
 
 	// transform is necessary
 	if (cmd.hasOption(TRANSFORM_OPTION)) {
-	    Transformer t = new Transformer(platform, rDatabase, gDatabase,
+	    Transformer t = new Transformer(rdbs, rDatabase, gdbs,
 		    cfg.getLinkTableInfos(), dataSourceInfo.getUseSchema(),
 		    dataSourceInfo.getUseDelimiter());
 
