@@ -85,7 +85,7 @@ public class NeoWrapper implements Wrapper {
      * @param properties
      *            Properties for the new node.
      */
-    public void createNode(final Map<String, Object> properties) {
+    public boolean createNode(final Map<String, Object> properties) {
 	String type = (String) properties.get(Transformer.TYPE_KEY);
 	Node refNode = getReferenceNode(type);
 	// create node
@@ -100,17 +100,18 @@ public class NeoWrapper implements Wrapper {
 	refNode.createRelationshipTo(node, RelTypes.INSTANCE);
 
 	log.debug(String.format("Created Neo4j node: %s", node));
+	return node != null;
     }
 
-    public void createRelationship(final String sourceID,
+    public boolean createRelationship(final String sourceID,
 	    final String targetID, final String relType) {
-	createRelationship(sourceID, targetID, relType, null);
+	return createRelationship(sourceID, targetID, relType, null);
     }
 
     /**
      * Creates a link between to given nodes if those node exist.
      */
-    public void createRelationship(final String sourceID,
+    public boolean createRelationship(final String sourceID,
 	    final String targetID, final String relType,
 	    final Map<String, Object> properties) {
 	Node source = nodeIndex.get(Transformer.ID_KEY, sourceID).getSingle();
@@ -124,6 +125,7 @@ public class NeoWrapper implements Wrapper {
 		    rel.setProperty(p.getKey(), getSupportedType(p.getValue()));
 		}
 	    }
+	    return true;
 	} else {
 	    if (source == null) {
 		log.warn(String.format("Source node [%s] not found in index",
@@ -134,6 +136,7 @@ public class NeoWrapper implements Wrapper {
 			targetID));
 	    }
 	}
+	return false;
     }
 
     public void printNodes(String type) {

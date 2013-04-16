@@ -1,17 +1,13 @@
 package org.graphbi.rdb2graph.transformer;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.beanutils.DynaBean;
-import org.apache.commons.collections.Closure;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
-import org.apache.commons.collections.TransformerUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.ddlutils.Platform;
@@ -86,7 +82,7 @@ public class Transformer {
 	// foreign keys (1:n)
 	transformForeignKeys(relDatabase.getTables());
 	// link tables (n:m)
-	transformLinkTables(relDatabase.getTables());
+	// transformLinkTables(relDatabase.getTables());
 
 	sw.stop();
 	log.info(String
@@ -108,7 +104,9 @@ public class Transformer {
 	StopWatch sw = new StopWatch();
 	sw.start();
 	for (Table t : tables) {
-	    transformTable(t);
+	    if (!t.isIgnored()) {
+		transformTable(t);
+	    }
 	}
 	sw.stop();
 	log.info(String.format("Finished transforming %d tables, took %s",
@@ -139,17 +137,20 @@ public class Transformer {
 
 	// subtract the pk- and fk-columns from the whole column set
 	List<Column> propertyCols = getPropertyColumns(table);
-	
+
 	// get a list of all columns in the model to query
 	List<String> colNames = new ArrayList<String>();
 	for (Column col : table.getColumns()) {
-	    colNames.add(getFormattedColumnName(col));
+	    if (!col.isIgnored()) {
+		colNames.add(getFormattedColumnName(col));
+	    }
 	}
 
 	// get the data
-	Iterator it = platform.query(relDatabase, String.format(
-		"SELECT %s FROM %s",
-		StringUtils.join(colNames.iterator(), ","), tableName));
+	Iterator it = platform.query(
+		relDatabase,
+		String.format("SELECT %s FROM %s",
+			StringUtils.join(colNames.iterator(), ","), tableName));
 
 	// store non-pk properties
 	Map<String, Object> properties = null;
@@ -160,11 +161,10 @@ public class Transformer {
 
 	while (it.hasNext()) {
 	    row = (DynaBean) it.next();
-	    rowCnt++;
 	    properties = new HashMap<String, Object>();
 	    // meta
 	    properties.put(SOURCE_KEY, relDatabase.getName());
-	    properties.put(TYPE_KEY, table.getName());
+	    properties.put(TYPE_KEY, getTableIdentifier(table));
 	    properties.put(ID_KEY, getPrimaryKeyNodeValue(table, row));
 
 	    // read all non-pk properties (including foreign keys)
@@ -175,7 +175,9 @@ public class Transformer {
 		}
 	    }
 	    // create new node based on the given properties
-	    graphDatabase.createNode(properties);
+	    if (graphDatabase.createNode(properties)) {
+		rowCnt++;
+	    }
 	}
 	graphDatabase.successTransaction();
 	graphDatabase.finishTransaction();
@@ -198,7 +200,7 @@ public class Transformer {
 	StopWatch sw = new StopWatch();
 	sw.start();
 	for (Table t : tables) {
-	    if (!linkTableMap.containsKey(getFormattedTableName(t))) {
+	    if (!t.isIgnored()) {
 		if (t.getForeignKeyCount() > 0) {
 		    transformForeignKeys(t);
 		}
@@ -263,15 +265,17 @@ public class Transformer {
 		if (!"".equals(foreignIdString)) {
 		    properties = new HashMap<String, Object>();
 		    // foreign node key
-		    pkForeign = String.format("%s_%s", formatKeyCandidate(fk
-			    .getForeignTable().getName()), foreignIdString);
+		    pkForeign = String.format("%s_%s",
+			    formatKeyCandidate(getTableIdentifier(fk
+				    .getForeignTable())), foreignIdString);
 		    properties.put(SOURCE_KEY, relDatabase.getName());
-		    properties.put(TYPE_KEY, fk.getName());
+		    properties.put(TYPE_KEY, getForeignKeyIdentifier(fk));
 		    properties.put(ID_KEY,
 			    getPrimaryKeyLinkValue(fk, pkLocal, pkForeign));
-		    graphDatabase.createRelationship(pkLocal, pkForeign,
-			    fk.getName(), properties);
-		    linkCnt++;
+		    if (graphDatabase.createRelationship(pkLocal, pkForeign,
+			    fk.getEdgeClass(), properties)) {
+			linkCnt++;
+		    }
 		}
 	    }
 	}
@@ -291,7 +295,7 @@ public class Transformer {
      */
     private void transformLinkTables(final Table... tables) {
 	for (Table t : tables) {
-	    if (linkTableMap.containsKey(getFormattedTableName(t))) {
+	    if (!t.isIgnored()) {
 		transformLinkTable(t);
 	    }
 	}
@@ -382,7 +386,7 @@ public class Transformer {
      * @return Internally used primary key for the given row.
      */
     private String getPrimaryKeyNodeValue(final Table t, final DynaBean row) {
-	String primaryKey = formatKeyCandidate(t.getName());
+	String primaryKey = formatKeyCandidate(getTableIdentifier(t));
 	for (Column c : t.getPrimaryKeyColumns()) {
 	    primaryKey += "_" + row.get(c.getName());
 	}
@@ -402,7 +406,8 @@ public class Transformer {
      */
     private String getPrimaryKeyLinkValue(final ForeignKey fk,
 	    final String sourceId, final String targetId) {
-	return String.format("%s_%s_%s", fk.getName(), sourceId, targetId);
+	return String.format("%s_%s_%s", getForeignKeyIdentifier(fk), sourceId,
+		targetId);
 
     }
 
@@ -470,7 +475,37 @@ public class Transformer {
 	}
     }
 
+    /**
+     * Does some formatting for key identifiers for nodes and edges.
+     * 
+     * @param keyCandidate
+     * @return Formatted key candidate.
+     */
     private String formatKeyCandidate(String keyCandidate) {
-	return keyCandidate.toLowerCase().replaceAll(" ", "_");
+	return keyCandidate.replaceAll(" ", "_");
+    }
+
+    /**
+     * Returns the identifier for this table. If there is a nodeClass defined
+     * for this table, this will be returned, else the table's name will be used
+     * as an identifier.
+     * 
+     * @param t The table.
+     * @return The table's identifier.
+     */
+    private String getTableIdentifier(Table t) {
+	return (t.getNodeClass() != null) ? t.getNodeClass() : t.getName();
+    }
+
+    /**
+     * Returns the identifier for this foreign key. If there is a edgeClass
+     * defined for this foreign key, this will be returned, else the forein
+     * key's name will be used as an identifier.
+     * 
+     * @param fk The foreign key.
+     * @return The foreign key's identifier.
+     */
+    private String getForeignKeyIdentifier(ForeignKey fk) {
+	return (fk.getEdgeClass() != null) ? fk.getEdgeClass() : fk.getName();
     }
 }

@@ -25,12 +25,12 @@ public interface Wrapper {
      */
     void rollbackTransaction();
 
-    void createNode(final Map<String, Object> properties);
+    boolean createNode(final Map<String, Object> properties);
 
-    void createRelationship(final String sourceID, final String targetID,
+    boolean createRelationship(final String sourceID, final String targetID,
 	    final String relType);
 
-    void createRelationship(final String sourceID, final String targetID,
+    boolean createRelationship(final String sourceID, final String targetID,
 	    final String relType, final Map<String, Object> properties);
 
 }
