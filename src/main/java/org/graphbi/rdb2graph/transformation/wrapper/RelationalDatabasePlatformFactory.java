@@ -5,14 +5,15 @@ import javax.sql.DataSource;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformFactory;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.util.DataSourceInfo;
+import org.graphbi.rdb2graph.util.config.DataSourceInfo;
 
 import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
-public class RDBPlatformFactory {
+public class RelationalDatabasePlatformFactory {
 
-    private static Logger log = Logger.getLogger(RDBPlatformFactory.class);
+    private static Logger log = Logger
+	    .getLogger(RelationalDatabasePlatformFactory.class);
 
     /**
      * 

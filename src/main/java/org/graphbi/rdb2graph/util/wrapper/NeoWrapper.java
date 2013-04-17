@@ -1,11 +1,13 @@
-package org.graphbi.rdb2graph.transformation.wrapper;
+package org.graphbi.rdb2graph.util.wrapper;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
+import org.graphbi.rdb2graph.analysis.wrapper.GraphAnalysisWrapper;
 import org.graphbi.rdb2graph.transformation.Transformer;
+import org.graphbi.rdb2graph.transformation.wrapper.GraphTransformationWrapper;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -15,11 +17,12 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
 
-public class NeoWrapper implements Wrapper {
+public class NeoWrapper implements GraphTransformationWrapper,
+	GraphAnalysisWrapper {
     private static Logger log = Logger.getLogger(NeoWrapper.class);
 
     /*
-     * Used to the link insance nodes with reference / type nodes.
+     * Used to the link instance nodes with reference / type nodes.
      * 
      * @author s1ck
      */
@@ -173,5 +176,9 @@ public class NeoWrapper implements Wrapper {
 	} else {
 	    return o.toString();
 	}
+    }
+
+    public String getName() {
+	return "Neo4j";
     }
 }

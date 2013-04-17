@@ -17,8 +17,8 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.transformation.wrapper.Wrapper;
-import org.graphbi.rdb2graph.util.Config;
+import org.graphbi.rdb2graph.transformation.wrapper.GraphTransformationWrapper;
+import org.graphbi.rdb2graph.util.config.Config;
 
 import scala.actors.threadpool.Arrays;
 
@@ -36,7 +36,7 @@ public class Transformer {
 
     private final Platform platform;
     private final Database relDatabase;
-    private final Wrapper graphDatabase;
+    private final GraphTransformationWrapper graphDatabase;
 
     private long rowCnt;
     private long linkCnt;
@@ -45,12 +45,13 @@ public class Transformer {
     private final boolean useDelimiters;
 
     public Transformer(Platform platform, Database relDatabase,
-	    Wrapper graphDatabase) {
+	    GraphTransformationWrapper graphDatabase) {
 	this(platform, relDatabase, graphDatabase, false, false);
     }
 
     public Transformer(Platform platform, Database relDatabase,
-	    Wrapper graphDatabase, boolean useSchema, boolean useDelimiters) {
+	    GraphTransformationWrapper graphDatabase, boolean useSchema,
+	    boolean useDelimiters) {
 	this.platform = platform;
 	this.relDatabase = relDatabase;
 	this.graphDatabase = graphDatabase;
@@ -280,8 +281,8 @@ public class Transformer {
 	graphDatabase.finishTransaction();
 
 	sw.stop();
-	log.info(String.format("Took %s Links passed: %d Links failed: %d",
-		sw, linksPassed, linksFailed));
+	log.info(String.format("Took %s Links passed: %d Links failed: %d", sw,
+		linksPassed, linksFailed));
     }
 
     /**

@@ -1,4 +1,4 @@
-package org.graphbi.rdb2graph.util;
+package org.graphbi.rdb2graph.util.config;
 
 import java.io.File;
 import java.io.IOException;
