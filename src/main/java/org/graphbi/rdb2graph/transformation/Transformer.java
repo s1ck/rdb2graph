@@ -1,4 +1,4 @@
-package org.graphbi.rdb2graph.transformer;
+package org.graphbi.rdb2graph.transformation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.transformer.wrapper.Wrapper;
+import org.graphbi.rdb2graph.transformation.wrapper.Wrapper;
 import org.graphbi.rdb2graph.util.Config;
 
 import scala.actors.threadpool.Arrays;

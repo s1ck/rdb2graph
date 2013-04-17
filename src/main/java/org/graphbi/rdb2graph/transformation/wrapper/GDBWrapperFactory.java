@@ -1,4 +1,4 @@
-package org.graphbi.rdb2graph.transformer.wrapper;
+package org.graphbi.rdb2graph.transformation.wrapper;
 
 import java.io.File;
 import java.io.IOException;

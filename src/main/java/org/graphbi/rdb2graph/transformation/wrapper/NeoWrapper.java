@@ -1,11 +1,11 @@
-package org.graphbi.rdb2graph.transformer.wrapper;
+package org.graphbi.rdb2graph.transformation.wrapper;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.transformer.Transformer;
+import org.graphbi.rdb2graph.transformation.Transformer;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
