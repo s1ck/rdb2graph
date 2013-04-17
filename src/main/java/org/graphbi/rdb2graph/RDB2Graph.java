@@ -15,17 +15,17 @@ import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.transformer.Transformer;
+import org.graphbi.rdb2graph.transformer.wrapper.GDBWrapperFactory;
+import org.graphbi.rdb2graph.transformer.wrapper.RDBPlatformFactory;
+import org.graphbi.rdb2graph.transformer.wrapper.Wrapper;
 import org.graphbi.rdb2graph.util.Config;
 import org.graphbi.rdb2graph.util.DataSinkInfo;
 import org.graphbi.rdb2graph.util.DataSourceInfo;
-import org.graphbi.rdb2graph.util.GDBWrapperFactory;
-import org.graphbi.rdb2graph.util.RDBPlatformFactory;
-import org.graphbi.rdb2graph.wrapper.Wrapper;
 
 @SuppressWarnings("static-access")
-public class TransformerApp {
+public class RDB2Graph {
 
-    private static Logger log = Logger.getLogger(TransformerApp.class);
+    private static Logger log = Logger.getLogger(RDB2Graph.class);
 
     private static Options options;
 
@@ -80,7 +80,7 @@ public class TransformerApp {
     public static Database readDatabaseFromXML(String fileName) {
 	log.info(String
 		.format("Reading database schema from file %s", fileName));
-	return new DatabaseIO().read(TransformerApp.class.getResource(
+	return new DatabaseIO().read(RDB2Graph.class.getResource(
 		"/" + fileName).getFile());
     }
 
@@ -97,7 +97,7 @@ public class TransformerApp {
 	String cfgFile = cmd.hasOption(CONFIG_OPTION) ? cmd
 		.getOptionValue(CONFIG_OPTION) : "/config.xml";
 
-	Config cfg = new Config(TransformerApp.class.getResource(cfgFile)
+	Config cfg = new Config(RDB2Graph.class.getResource(cfgFile)
 		.getFile());
 	cfg.parse();
 

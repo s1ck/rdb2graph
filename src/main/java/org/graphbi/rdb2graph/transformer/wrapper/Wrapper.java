@@ -1,4 +1,4 @@
-package org.graphbi.rdb2graph.wrapper;
+package org.graphbi.rdb2graph.transformer.wrapper;
 
 import java.util.Map;
 

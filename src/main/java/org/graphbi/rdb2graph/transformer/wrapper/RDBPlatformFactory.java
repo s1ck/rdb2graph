@@ -1,10 +1,11 @@
-package org.graphbi.rdb2graph.util;
+package org.graphbi.rdb2graph.transformer.wrapper;
 
 import javax.sql.DataSource;
 
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.PlatformFactory;
 import org.apache.log4j.Logger;
+import org.graphbi.rdb2graph.util.DataSourceInfo;
 
 import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;

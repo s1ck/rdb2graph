@@ -1,11 +1,10 @@
-package org.graphbi.rdb2graph.util;
+package org.graphbi.rdb2graph.transformer.wrapper;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.wrapper.NeoWrapper;
-import org.graphbi.rdb2graph.wrapper.Wrapper;
+import org.graphbi.rdb2graph.util.DataSinkInfo;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.impl.util.FileUtils;

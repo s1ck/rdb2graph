@@ -17,8 +17,8 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
+import org.graphbi.rdb2graph.transformer.wrapper.Wrapper;
 import org.graphbi.rdb2graph.util.Config;
-import org.graphbi.rdb2graph.wrapper.Wrapper;
 
 import scala.actors.threadpool.Arrays;
 
