@@ -1,13 +1,16 @@
 package org.graphbi.rdb2graph.util.wrapper;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.analysis.wrapper.GraphAnalysisWrapper;
-import org.graphbi.rdb2graph.transformation.Transformer;
 import org.graphbi.rdb2graph.transformation.wrapper.GraphTransformationWrapper;
+import org.graphbi.rdb2graph.util.config.Constants;
+import org.graphbi.rdb2graph.util.config.NodeSuperClass;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -16,6 +19,7 @@ import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
+import org.neo4j.tooling.GlobalGraphOperations;
 
 public class NeoWrapper implements GraphTransformationWrapper,
 	GraphAnalysisWrapper {
@@ -89,15 +93,14 @@ public class NeoWrapper implements GraphTransformationWrapper,
      *            Properties for the new node.
      */
     public boolean createNode(final Map<String, Object> properties) {
-	String type = (String) properties.get(Transformer.TYPE_KEY);
+	String type = (String) properties.get(Constants.TYPE_KEY);
 	Node refNode = getReferenceNode(type);
 	// create node
 	Node node = graphdb.createNode();
 	for (Map.Entry<String, Object> e : properties.entrySet()) {
 	    node.setProperty(e.getKey(), getSupportedType(e.getValue()));
 	}
-	nodeIndex.add(node, Transformer.ID_KEY,
-		properties.get(Transformer.ID_KEY));
+	nodeIndex.add(node, Constants.ID_KEY, properties.get(Constants.ID_KEY));
 
 	// create edge between refNode and new node
 	refNode.createRelationshipTo(node, RelTypes.INSTANCE);
@@ -117,8 +120,8 @@ public class NeoWrapper implements GraphTransformationWrapper,
     public boolean createRelationship(final String sourceID,
 	    final String targetID, final String relType,
 	    final Map<String, Object> properties) {
-	Node source = nodeIndex.get(Transformer.ID_KEY, sourceID).getSingle();
-	Node target = nodeIndex.get(Transformer.ID_KEY, targetID).getSingle();
+	Node source = nodeIndex.get(Constants.ID_KEY, sourceID).getSingle();
+	Node target = nodeIndex.get(Constants.ID_KEY, targetID).getSingle();
 	if (source != null && target != null) {
 	    log.debug(String.format("Connecting %s and %s", source, target));
 	    Relationship rel = source.createRelationshipTo(target,
@@ -178,7 +181,51 @@ public class NeoWrapper implements GraphTransformationWrapper,
 	}
     }
 
+    @Override
     public String getName() {
 	return "Neo4j";
+    }
+
+    @Override
+    public String getNodeClass(Long nodeId) {
+	Node v = graphdb.getNodeById(nodeId);
+	if (v.hasProperty(Constants.TYPE_KEY)) {
+	    return (String) v.getProperty(Constants.TYPE_KEY);
+	}
+	return null;
+    }
+
+    @Override
+    public Set<Long> getNodesByClass(Map<String, NodeSuperClass> typeClassMap,
+	    NodeSuperClass nodeClass) {
+	Set<Long> nodes = new HashSet<Long>();
+	String nodeType;
+	for (Node n : GlobalGraphOperations.at(graphdb).getAllNodes()) {
+	    nodeType = (String) n.getProperty(Constants.TYPE_KEY, null);
+	    if (nodeType != null && typeClassMap.containsKey(nodeType)
+		    && typeClassMap.get(nodeType).equals(nodeClass)) {
+		nodes.add(n.getId());
+	    }
+	}
+	return nodes;
+    }
+
+    @Override
+    public Set<Long> getIncidentEdges(Long nodeId) {
+	Set<Long> edgeIds = new HashSet<Long>();
+	for (Relationship e : graphdb.getNodeById(nodeId).getRelationships(
+		Direction.BOTH)) {
+	    edgeIds.add(e.getId());
+	}
+	return edgeIds;
+    }
+
+    @Override
+    public Set<Long> getAdjacentNodes(Long edgeId) {
+	Set<Long> nodes = new HashSet<Long>();
+	Relationship e = graphdb.getRelationshipById(edgeId);
+	nodes.add(e.getStartNode().getId());
+	nodes.add(e.getEndNode().getId());
+	return nodes;
     }
 }

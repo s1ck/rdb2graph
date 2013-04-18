@@ -1,6 +1,7 @@
 package org.graphbi.rdb2graph;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -14,7 +15,9 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.analysis.CaseGraphAnalyzer;
+import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraph;
+import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphAnalyzer;
+import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphExtractor;
 import org.graphbi.rdb2graph.analysis.wrapper.GraphAnalysisWrapper;
 import org.graphbi.rdb2graph.analysis.wrapper.GraphAnalysisWrapperFactory;
 import org.graphbi.rdb2graph.transformation.Transformer;
@@ -65,7 +68,7 @@ public class RDB2Graph {
 			"Transform relational database into graph database.")
 		.withLongOpt(TRANSFORM_LONG_OPT).create(TRANSFORM_OPTION);
 	Option analyze = OptionBuilder.hasArg()
-		.withDescription("Analzye the graph. Possible args: [cases]")
+		.withDescription("Analzye the graph. Possible args: [opgraph]")
 		.withLongOpt(ANALYZE_LONG_OPTION).create(ANALYZE_OPTION);
 
 	options.addOption(help);
@@ -143,10 +146,13 @@ public class RDB2Graph {
 	    GraphAnalysisWrapper gdbs = GraphAnalysisWrapperFactory
 		    .getInstance(dataSinkInfo);
 	    String arg = cmd.getOptionValue(ANALYZE_OPTION).toLowerCase();
-	    if ("case".equals(arg)) {
-		CaseGraphAnalyzer caseAnalyzer = new CaseGraphAnalyzer(
+	    if ("opgraph".equals(arg)) {
+		OperationGraphExtractor opGraphExtractor = new OperationGraphExtractor(
 			rDatabaseSchema, gdbs);
-		caseAnalyzer.analyze();
+		OperationGraphAnalyzer opGraphAnalyzer = new OperationGraphAnalyzer(
+			rDatabaseSchema, gdbs);
+		// extract and analyze the results
+		opGraphAnalyzer.analyze(opGraphExtractor.extract());
 	    }
 	}
     }

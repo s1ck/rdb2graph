@@ -19,6 +19,7 @@ import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.transformation.wrapper.GraphTransformationWrapper;
 import org.graphbi.rdb2graph.util.config.Config;
+import org.graphbi.rdb2graph.util.config.Constants;
 
 import scala.actors.threadpool.Arrays;
 
@@ -30,9 +31,6 @@ public class Transformer {
      * Property keys for the Property Graph Model to store some meta about the
      * origin of the nodes and edges.
      */
-    public static final String ID_KEY = "__id__";
-    public static final String TYPE_KEY = "__type__";
-    public static final String SOURCE_KEY = "__source__";
 
     private final Platform platform;
     private final Database relDatabase;
@@ -152,9 +150,9 @@ public class Transformer {
 	    row = (DynaBean) it.next();
 	    properties = new HashMap<String, Object>();
 	    // meta
-	    properties.put(SOURCE_KEY, relDatabase.getName());
-	    properties.put(TYPE_KEY, getTableIdentifier(table));
-	    properties.put(ID_KEY, getPrimaryKeyNodeValue(table, row));
+	    properties.put(Constants.SOURCE_KEY, relDatabase.getName());
+	    properties.put(Constants.TYPE_KEY, getTableIdentifier(table));
+	    properties.put(Constants.ID_KEY, getPrimaryKeyNodeValue(table, row));
 
 	    // read all non-pk properties (including foreign keys)
 	    for (Column c : propertyCols) {
@@ -263,9 +261,9 @@ public class Transformer {
 		    pkForeign = String.format("%s_%s",
 			    formatKeyCandidate(getTableIdentifier(fk
 				    .getForeignTable())), foreignIdString);
-		    properties.put(SOURCE_KEY, relDatabase.getName());
-		    properties.put(TYPE_KEY, getForeignKeyIdentifier(fk));
-		    properties.put(ID_KEY,
+		    properties.put(Constants.SOURCE_KEY, relDatabase.getName());
+		    properties.put(Constants.TYPE_KEY, getForeignKeyIdentifier(fk));
+		    properties.put(Constants.ID_KEY,
 			    getPrimaryKeyLinkValue(fk, pkLocal, pkForeign));
 		    if (graphDatabase.createRelationship(pkLocal, pkForeign,
 			    fk.getEdgeClass(), properties)) {
@@ -284,69 +282,6 @@ public class Transformer {
 	log.info(String.format("Took %s Links passed: %d Links failed: %d", sw,
 		linksPassed, linksFailed));
     }
-
-    /**
-     * Transforms a given collection of link tables based on the given LinkTable
-     * Information
-     * 
-     * @param tables
-     *            Collection of tables
-     */
-    // private void transformLinkTables(final Table... tables) {
-    // for (Table t : tables) {
-    // if (!t.isIgnored()) {
-    // transformLinkTable(t);
-    // }
-    // }
-    // }
-
-    /**
-     * Creates relationships based on the link information in the given link
-     * table.
-     * 
-     * @param table
-     */
-    // @SuppressWarnings("rawtypes")
-    // private void transformLinkTable(final Table table) {
-    // log.info(String.format("Transforming link table %s", table));
-    // StopWatch sw = new StopWatch();
-    // sw.start();
-    // LinkTableInfo tableInfo = linkTableMap.get(table.getName());
-    // List<String> selectColumns = new ArrayList<String>();
-    // for (LinkInfo linkInfo : tableInfo.getLinkInfos()) {
-    // selectColumns.add(linkInfo.getFromColumnName());
-    // selectColumns.add(linkInfo.getToColumnName());
-    // }
-    //
-    // // get the relevant data
-    // Iterator it = platform.query(relDatabase, String.format(
-    // "SELECT %s FROM %s",
-    // StringUtils.join(selectColumns.toArray(), ","),
-    // getFormattedTableName(table)));
-    // DynaBean row;
-    // String pkFrom, pkTo;
-    //
-    // graphDatabase.beginTransaction();
-    // while (it.hasNext()) {
-    // row = (DynaBean) it.next();
-    //
-    // for (LinkInfo linkInfo : tableInfo.getLinkInfos()) {
-    // pkFrom = String.format("%s_%s", linkInfo.getFromTableName(),
-    // row.get(linkInfo.getFromColumnName()));
-    // pkTo = String.format("%s_%s", linkInfo.getToTableName(),
-    // row.get(linkInfo.getToColumnName()));
-    //
-    // // TODO: read properties for the relationship
-    // graphDatabase.createRelationship(pkFrom, pkTo,
-    // linkInfo.getLinkType());
-    // linkCnt++;
-    // }
-    // }
-    // graphDatabase.successTransaction();
-    // graphDatabase.finishTransaction();
-    // sw.stop();
-    // log.info(String.format("Took %s", sw));
-    // }
 
     /**
      * Returns a list of columns which define properties in the given table.
