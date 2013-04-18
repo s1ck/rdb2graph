@@ -93,7 +93,7 @@ public class NeoWrapper implements GraphTransformationWrapper,
      *            Properties for the new node.
      */
     public boolean createNode(final Map<String, Object> properties) {
-	String type = (String) properties.get(Constants.TYPE_KEY);
+	String type = (String) properties.get(Constants.CLASS_KEY);
 	Node refNode = getReferenceNode(type);
 	// create node
 	Node node = graphdb.createNode();
@@ -189,19 +189,19 @@ public class NeoWrapper implements GraphTransformationWrapper,
     @Override
     public String getNodeClass(Long nodeId) {
 	Node v = graphdb.getNodeById(nodeId);
-	if (v.hasProperty(Constants.TYPE_KEY)) {
-	    return (String) v.getProperty(Constants.TYPE_KEY);
+	if (v.hasProperty(Constants.CLASS_KEY)) {
+	    return (String) v.getProperty(Constants.CLASS_KEY);
 	}
 	return null;
     }
 
     @Override
-    public Set<Long> getNodesByClass(Map<String, NodeSuperClass> typeClassMap,
+    public Set<Long> getNodesBySuperClass(Map<String, NodeSuperClass> typeClassMap,
 	    NodeSuperClass nodeClass) {
 	Set<Long> nodes = new HashSet<Long>();
 	String nodeType;
 	for (Node n : GlobalGraphOperations.at(graphdb).getAllNodes()) {
-	    nodeType = (String) n.getProperty(Constants.TYPE_KEY, null);
+	    nodeType = (String) n.getProperty(Constants.CLASS_KEY, null);
 	    if (nodeType != null && typeClassMap.containsKey(nodeType)
 		    && typeClassMap.get(nodeType).equals(nodeClass)) {
 		nodes.add(n.getId());
@@ -221,11 +221,21 @@ public class NeoWrapper implements GraphTransformationWrapper,
     }
 
     @Override
-    public Set<Long> getAdjacentNodes(Long edgeId) {
+    public Set<Long> getIncidentNodes(Long edgeId) {
 	Set<Long> nodes = new HashSet<Long>();
 	Relationship e = graphdb.getRelationshipById(edgeId);
 	nodes.add(e.getStartNode().getId());
 	nodes.add(e.getEndNode().getId());
+	return nodes;
+    }
+
+    @Override
+    public Set<Long> getAdjacentNodes(Long nodeId) {
+	Set<Long> nodes = new HashSet<Long>();
+	Node v = graphdb.getNodeById(nodeId);
+	for (Relationship e : v.getRelationships(Direction.BOTH)) {
+	    nodes.add(e.getEndNode().getId());
+	}
 	return nodes;
     }
 }

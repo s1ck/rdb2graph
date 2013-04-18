@@ -8,7 +8,7 @@ public class Constants {
     /**
      * Key for type node and edge types.
      */
-    public static final String TYPE_KEY = "__type__";
+    public static final String CLASS_KEY = "__class__";
     /**
      * Key to track the source (e.g. the relational database) of a node / edge.
      */

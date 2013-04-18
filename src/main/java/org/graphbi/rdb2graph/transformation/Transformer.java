@@ -151,7 +151,7 @@ public class Transformer {
 	    properties = new HashMap<String, Object>();
 	    // meta
 	    properties.put(Constants.SOURCE_KEY, relDatabase.getName());
-	    properties.put(Constants.TYPE_KEY, getTableIdentifier(table));
+	    properties.put(Constants.CLASS_KEY, getTableIdentifier(table));
 	    properties.put(Constants.ID_KEY, getPrimaryKeyNodeValue(table, row));
 
 	    // read all non-pk properties (including foreign keys)
@@ -262,7 +262,7 @@ public class Transformer {
 			    formatKeyCandidate(getTableIdentifier(fk
 				    .getForeignTable())), foreignIdString);
 		    properties.put(Constants.SOURCE_KEY, relDatabase.getName());
-		    properties.put(Constants.TYPE_KEY, getForeignKeyIdentifier(fk));
+		    properties.put(Constants.CLASS_KEY, getForeignKeyIdentifier(fk));
 		    properties.put(Constants.ID_KEY,
 			    getPrimaryKeyLinkValue(fk, pkLocal, pkForeign));
 		    if (graphDatabase.createRelationship(pkLocal, pkForeign,

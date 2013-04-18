@@ -148,7 +148,7 @@ public class RDB2Graph {
 	    String arg = cmd.getOptionValue(ANALYZE_OPTION).toLowerCase();
 	    if ("opgraph".equals(arg)) {
 		OperationGraphExtractor opGraphExtractor = new OperationGraphExtractor(
-			rDatabaseSchema, gdbs);
+			gdbs, rDatabaseSchema);
 		OperationGraphAnalyzer opGraphAnalyzer = new OperationGraphAnalyzer(
 			rDatabaseSchema, gdbs);
 		// extract and analyze the results

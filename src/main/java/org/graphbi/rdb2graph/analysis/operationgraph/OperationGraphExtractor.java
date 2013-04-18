@@ -30,10 +30,20 @@ public class OperationGraphExtractor {
     /*
      * Maps the type of a node to a class (Resource / Document)
      */
-    private Map<String, NodeSuperClass> nodeTypeClassMap;
+    private final Map<String, NodeSuperClass> nodeClassSuperClassMap;
 
-    public OperationGraphExtractor(Database relationalDB,
-	    GraphAnalysisWrapper graphWrapper) {
+    public OperationGraphExtractor(GraphAnalysisWrapper graphWrapper,
+	    Map<String, NodeSuperClass> nodeClassSuperClassMap) {
+	if (graphWrapper == null) {
+	    throw new IllegalArgumentException("graphWrapper must not be null.");
+	}
+	this.graphDB = graphWrapper;
+	this.relationalDB = null;
+	this.nodeClassSuperClassMap = nodeClassSuperClassMap;
+    }
+
+    public OperationGraphExtractor(GraphAnalysisWrapper graphWrapper,
+	    Database relationalDB) {
 	if (relationalDB == null) {
 	    throw new IllegalArgumentException(
 		    "relationalModel must not be null.");
@@ -43,31 +53,35 @@ public class OperationGraphExtractor {
 	}
 	this.relationalDB = relationalDB;
 	this.graphDB = graphWrapper;
-	this.nodeTypeClassMap = new HashMap<String, NodeSuperClass>();
+	this.nodeClassSuperClassMap = initNodeClassSuperClassMap();
     }
 
-    private void init() {
+    private Map<String, NodeSuperClass> initNodeClassSuperClassMap() {
 	// read the class (document / resource) of each node class for faster
 	// lookup during extraction
+	Map<String, NodeSuperClass> nodeClassSuperClassMap = new HashMap<String, NodeSuperClass>();
 	for (Table t : relationalDB.getTables()) {
 	    if (t.getDescription().toLowerCase().equals("r")) {
-		nodeTypeClassMap.put(t.getNodeClass(), NodeSuperClass.RESOURCE);
+		nodeClassSuperClassMap.put(t.getNodeClass(),
+			NodeSuperClass.RESOURCE);
 	    } else if (t.getDescription().toLowerCase().equals("d")) {
-		nodeTypeClassMap.put(t.getNodeClass(), NodeSuperClass.DOCUMENT);
+		nodeClassSuperClassMap.put(t.getNodeClass(),
+			NodeSuperClass.DOCUMENT);
 	    }
 	}
+	return nodeClassSuperClassMap;
     }
 
     public List<OperationGraph> extract() {
 	log.info("Extracting operation graphs.");
 	StopWatch sw = new StopWatch();
 	sw.start();
-	init();
+
 	// Operation graphs
 	List<OperationGraph> opGraphs = new ArrayList<OperationGraph>();
 	// candidate set of documents
-	Set<Long> candidates = graphDB.getNodesByClass(nodeTypeClassMap,
-		NodeSuperClass.DOCUMENT);
+	Set<Long> candidates = graphDB.getNodesBySuperClass(
+		nodeClassSuperClassMap, NodeSuperClass.DOCUMENT);
 	log.info(String.format("Starting analysis for %d document nodes",
 		candidates.size()));
 
@@ -101,7 +115,7 @@ public class OperationGraphExtractor {
 		// remove all edges already stored in the operation graph
 		incidentEdges.removeAll(opGraph.getEdges());
 		for (Long edgeId : incidentEdges) {
-		    nextCandidateSet = graphDB.getAdjacentNodes(edgeId);
+		    nextCandidateSet = graphDB.getIncidentNodes(edgeId);
 		    nextCandidateSet.remove(discoveryNode);
 		    // should be one left
 		    for (Long nextCandidate : nextCandidateSet) {
@@ -110,9 +124,10 @@ public class OperationGraphExtractor {
 			    String nodeClass = graphDB
 				    .getNodeClass(nextCandidate);
 			    if (nodeClass != null
-				    && nodeTypeClassMap.containsKey(nodeClass)
-				    && nodeTypeClassMap.get(nodeClass).equals(
-					    NodeSuperClass.DOCUMENT)) {
+				    && nodeClassSuperClassMap
+					    .containsKey(nodeClass)
+				    && nodeClassSuperClassMap.get(nodeClass)
+					    .equals(NodeSuperClass.DOCUMENT)) {
 				operationCandidatesQueue.add(nextCandidate);
 			    }
 			}
