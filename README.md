@@ -1,5 +1,5 @@
-rdb2graph - Relational Database To Property Graph Converter
-===========================================================
+rdb2graph - Relational Database To Property Graph Converter and Analysis Tool
+=============================================================================
 
 *rdb2graph can be used to convert a relational database on-line into a property graph model and store it in a graph database*
 
@@ -28,7 +28,7 @@ Microsoft SQL JDBC Driver (in case you haven't installed)
 
 rdb2graph
 
-* `mvn install`
+* `mvn clean install`
 
 Run: 
 
@@ -37,3 +37,4 @@ Run:
 * `mvn exec:java -Dexec.args="-e ddl.xml"` to extract the database schema into ddl.xml
 * `mvn exec:java -Dexec.args="-t"` to transform the relational database form source system to target system
 * `mvn exec:java -Dexec.args="-r erpnext-sample-ddl.xml -t"` to read the schema from a local file instead of the live database
+* `mvn exec:java -Dexec.args="-r erpnext-sample-ddl.xml -a opgraph"` to read the schema from a local file and analyze the graph for operation graphs
