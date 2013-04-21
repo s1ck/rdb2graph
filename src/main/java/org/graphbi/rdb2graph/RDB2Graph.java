@@ -1,7 +1,6 @@
 package org.graphbi.rdb2graph;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -15,7 +14,6 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraph;
 import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphAnalyzer;
 import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphExtractor;
 import org.graphbi.rdb2graph.analysis.wrapper.GraphAnalysisWrapper;

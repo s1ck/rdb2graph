@@ -50,4 +50,16 @@ public interface GraphAnalysisWrapper extends GraphWrapper {
      * @return A set of incident edges of nodeId
      */
     public Set<Long> getIncidentEdges(Long nodeId);
+
+    /**
+     * Returns all incident edges of the given node.
+     * 
+     * @param nodeId
+     *            The node's id
+     * @param skipInstance
+     *            if the graph uses instance edges these can be skipped using
+     *            this parameter.
+     * @return A set of incident edges of nodeId
+     */
+    public Set<Long> getIncidentEdges(Long nodeId, boolean skipInstance);
 }

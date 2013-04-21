@@ -9567,7 +9567,7 @@
 		</foreign-key>
 	</table>
 
-	<table description='D' R2G:ignore='false' name='tabBin'
+	<table description='R' R2G:ignore='false' name='tabBin'
 		R2G:nodeClass='StockBin'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />

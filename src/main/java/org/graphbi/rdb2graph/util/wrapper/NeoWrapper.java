@@ -196,8 +196,8 @@ public class NeoWrapper implements GraphTransformationWrapper,
     }
 
     @Override
-    public Set<Long> getNodesBySuperClass(Map<String, NodeSuperClass> typeClassMap,
-	    NodeSuperClass nodeClass) {
+    public Set<Long> getNodesBySuperClass(
+	    Map<String, NodeSuperClass> typeClassMap, NodeSuperClass nodeClass) {
 	Set<Long> nodes = new HashSet<Long>();
 	String nodeType;
 	for (Node n : GlobalGraphOperations.at(graphdb).getAllNodes()) {
@@ -212,10 +212,17 @@ public class NeoWrapper implements GraphTransformationWrapper,
 
     @Override
     public Set<Long> getIncidentEdges(Long nodeId) {
+	return getIncidentEdges(nodeId, false);
+    }
+
+    @Override
+    public Set<Long> getIncidentEdges(Long nodeId, boolean skipInstance) {
 	Set<Long> edgeIds = new HashSet<Long>();
 	for (Relationship e : graphdb.getNodeById(nodeId).getRelationships(
 		Direction.BOTH)) {
-	    edgeIds.add(e.getId());
+	    if (!e.isType(RelTypes.INSTANCE)) {
+		edgeIds.add(e.getId());
+	    }
 	}
 	return edgeIds;
     }
