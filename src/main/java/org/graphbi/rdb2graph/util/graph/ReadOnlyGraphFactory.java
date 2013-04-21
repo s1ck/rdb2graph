@@ -1,14 +1,13 @@
-package org.graphbi.rdb2graph.analysis.wrapper;
+package org.graphbi.rdb2graph.util.graph;
 
 import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.util.config.DataSinkInfo;
-import org.graphbi.rdb2graph.util.wrapper.NeoWrapper;
+import org.graphbi.rdb2graph.util.graph.impl.Neo4jGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
-public class GraphAnalysisWrapperFactory {
-    private static Logger log = Logger
-	    .getLogger(GraphAnalysisWrapperFactory.class);
+public class ReadOnlyGraphFactory {
+    private static Logger log = Logger.getLogger(ReadOnlyGraphFactory.class);
 
     /**
      * Returns an instance of GraphAnalysisWrapper based on the information in
@@ -17,16 +16,17 @@ public class GraphAnalysisWrapperFactory {
      * @param dataSinkInfo
      * @return
      */
-    public static GraphAnalysisWrapper getInstance(DataSinkInfo dataSinkInfo) {
+    public static ReadOnlyGraph getInstance(DataSinkInfo dataSinkInfo) {
 	if ("neo4j".equals(dataSinkInfo.getType())) {
 	    GraphDatabaseService graphdb = new GraphDatabaseFactory()
 		    .newEmbeddedDatabase(dataSinkInfo.getPath());
 	    registerShutdownHook(graphdb);
 	    log.info("Initialized Neo4j");
-	    return new NeoWrapper(graphdb);
+	    return new Neo4jGraph(graphdb);
 	} else {
-	    throw new IllegalArgumentException(
-		    "Only Neo4j is currently supported for analyzing.");
+	    throw new IllegalArgumentException("Configured graph database '"
+		    + dataSinkInfo.getType()
+		    + "' is not supported for read only operations.");
 	}
     }
 

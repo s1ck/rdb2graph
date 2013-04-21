@@ -1,12 +1,13 @@
-package org.graphbi.rdb2graph.util.wrapper;
+package org.graphbi.rdb2graph.util.graph;
 
-public interface GraphWrapper {
+public interface Graph {
     /**
      * Returns the graph database instance's name.
      * 
      * @return Graph database instance's name.
      */
     String getName();
+
     /**
      * Begins a transaction.
      * 

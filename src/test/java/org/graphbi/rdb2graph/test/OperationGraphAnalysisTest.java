@@ -7,17 +7,15 @@ import junit.framework.Assert;
 
 import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraph;
 import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphExtractor;
-import org.graphbi.rdb2graph.util.config.Constants;
-import org.graphbi.rdb2graph.util.wrapper.NeoWrapper;
+import org.graphbi.rdb2graph.util.graph.impl.Neo4jGraph;
 import org.junit.Test;
-import org.neo4j.graphdb.Node;
 
 public class OperationGraphAnalysisTest extends GraphBITest {
 
     @Test
     public void testOperationGraphExtractionOpGraphCount() {
 	OperationGraphExtractor extractor = new OperationGraphExtractor(
-		new NeoWrapper(graphDb), nodeClassSuperClassMap);
+		new Neo4jGraph(graphDb), nodeClassSuperClassMap);
 	List<OperationGraph> opGraphs = extractor.extract();
 
 	Assert.assertEquals(2, opGraphs.size());
@@ -26,7 +24,7 @@ public class OperationGraphAnalysisTest extends GraphBITest {
     @Test
     public void testOperationGraphExtractionOpGraphContent() {
 	OperationGraphExtractor extractor = new OperationGraphExtractor(
-		new NeoWrapper(graphDb), nodeClassSuperClassMap);
+		new Neo4jGraph(graphDb), nodeClassSuperClassMap);
 	List<OperationGraph> opGraphs = extractor.extract();
 
 	Assert.assertEquals(2, opGraphs.size());

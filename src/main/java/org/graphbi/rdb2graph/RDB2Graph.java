@@ -16,15 +16,15 @@ import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphAnalyzer;
 import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphExtractor;
-import org.graphbi.rdb2graph.analysis.wrapper.GraphAnalysisWrapper;
-import org.graphbi.rdb2graph.analysis.wrapper.GraphAnalysisWrapperFactory;
 import org.graphbi.rdb2graph.transformation.Transformer;
-import org.graphbi.rdb2graph.transformation.wrapper.GraphTransformationWrapper;
-import org.graphbi.rdb2graph.transformation.wrapper.GraphTransformationWrapperFactory;
-import org.graphbi.rdb2graph.transformation.wrapper.RelationalDatabasePlatformFactory;
 import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.DataSinkInfo;
 import org.graphbi.rdb2graph.util.config.DataSourceInfo;
+import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
+import org.graphbi.rdb2graph.util.graph.ReadOnlyGraphFactory;
+import org.graphbi.rdb2graph.util.graph.ReadWriteGraph;
+import org.graphbi.rdb2graph.util.graph.ReadWriteGraphFactory;
+import org.graphbi.rdb2graph.util.rdb.RelationalDatabasePlatformFactory;
 
 @SuppressWarnings("static-access")
 public class RDB2Graph {
@@ -130,7 +130,7 @@ public class RDB2Graph {
 	// transform is necessary
 	if (cmd.hasOption(TRANSFORM_OPTION)) {
 	    // set up graph database system
-	    GraphTransformationWrapper gdbs = GraphTransformationWrapperFactory
+	    ReadWriteGraph gdbs = ReadWriteGraphFactory
 		    .getInstance(dataSinkInfo);
 	    // and transform relational database into graph
 	    Transformer t = new Transformer(rdbs, rDatabaseSchema, gdbs,
@@ -141,8 +141,7 @@ public class RDB2Graph {
 	// analyze if necessary
 	if (cmd.hasOption(ANALYZE_OPTION)) {
 	    // set up graph database system
-	    GraphAnalysisWrapper gdbs = GraphAnalysisWrapperFactory
-		    .getInstance(dataSinkInfo);
+	    ReadOnlyGraph gdbs = ReadOnlyGraphFactory.getInstance(dataSinkInfo);
 	    String arg = cmd.getOptionValue(ANALYZE_OPTION).toLowerCase();
 	    if ("opgraph".equals(arg)) {
 		OperationGraphExtractor opGraphExtractor = new OperationGraphExtractor(

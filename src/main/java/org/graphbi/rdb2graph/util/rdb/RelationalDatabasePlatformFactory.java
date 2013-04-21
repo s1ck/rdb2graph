@@ -1,4 +1,4 @@
-package org.graphbi.rdb2graph.transformation.wrapper;
+package org.graphbi.rdb2graph.util.rdb;
 
 import javax.sql.DataSource;
 
@@ -10,6 +10,12 @@ import org.graphbi.rdb2graph.util.config.DataSourceInfo;
 import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
+/**
+ * Creates a Platform instance based on the configured data source.
+ * 
+ * @author Martin Junghanns
+ * 
+ */
 public class RelationalDatabasePlatformFactory {
 
     private static Logger log = Logger

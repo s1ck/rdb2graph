@@ -1,10 +1,8 @@
-package org.graphbi.rdb2graph.transformation.wrapper;
+package org.graphbi.rdb2graph.util.graph;
 
 import java.util.Map;
 
-import org.graphbi.rdb2graph.util.wrapper.GraphWrapper;
-
-public interface GraphTransformationWrapper extends GraphWrapper {
+public interface ReadWriteGraph extends ReadOnlyGraph {
     /**
      * Creates a node in the graph with the given properties.
      * 
@@ -33,5 +31,4 @@ public interface GraphTransformationWrapper extends GraphWrapper {
      */
     boolean createRelationship(final String sourceID, final String targetID,
 	    final String relType, final Map<String, Object> properties);
-
 }

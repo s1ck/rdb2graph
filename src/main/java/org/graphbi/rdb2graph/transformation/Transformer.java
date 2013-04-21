@@ -17,9 +17,9 @@ import org.apache.ddlutils.model.ForeignKey;
 import org.apache.ddlutils.model.Reference;
 import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.transformation.wrapper.GraphTransformationWrapper;
 import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.Constants;
+import org.graphbi.rdb2graph.util.graph.ReadWriteGraph;
 
 import scala.actors.threadpool.Arrays;
 
@@ -34,7 +34,7 @@ public class Transformer {
 
     private final Platform platform;
     private final Database relDatabase;
-    private final GraphTransformationWrapper graphDatabase;
+    private final ReadWriteGraph graphDatabase;
 
     private long rowCnt;
     private long linkCnt;
@@ -43,12 +43,12 @@ public class Transformer {
     private final boolean useDelimiters;
 
     public Transformer(Platform platform, Database relDatabase,
-	    GraphTransformationWrapper graphDatabase) {
+	    ReadWriteGraph graphDatabase) {
 	this(platform, relDatabase, graphDatabase, false, false);
     }
 
     public Transformer(Platform platform, Database relDatabase,
-	    GraphTransformationWrapper graphDatabase, boolean useSchema,
+	    ReadWriteGraph graphDatabase, boolean useSchema,
 	    boolean useDelimiters) {
 	this.platform = platform;
 	this.relDatabase = relDatabase;
@@ -152,7 +152,8 @@ public class Transformer {
 	    // meta
 	    properties.put(Constants.SOURCE_KEY, relDatabase.getName());
 	    properties.put(Constants.CLASS_KEY, getTableIdentifier(table));
-	    properties.put(Constants.ID_KEY, getPrimaryKeyNodeValue(table, row));
+	    properties
+		    .put(Constants.ID_KEY, getPrimaryKeyNodeValue(table, row));
 
 	    // read all non-pk properties (including foreign keys)
 	    for (Column c : propertyCols) {
@@ -262,7 +263,8 @@ public class Transformer {
 			    formatKeyCandidate(getTableIdentifier(fk
 				    .getForeignTable())), foreignIdString);
 		    properties.put(Constants.SOURCE_KEY, relDatabase.getName());
-		    properties.put(Constants.CLASS_KEY, getForeignKeyIdentifier(fk));
+		    properties.put(Constants.CLASS_KEY,
+			    getForeignKeyIdentifier(fk));
 		    properties.put(Constants.ID_KEY,
 			    getPrimaryKeyLinkValue(fk, pkLocal, pkForeign));
 		    if (graphDatabase.createRelationship(pkLocal, pkForeign,

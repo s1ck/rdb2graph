@@ -12,8 +12,8 @@ import org.apache.commons.lang.time.StopWatch;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.analysis.wrapper.GraphAnalysisWrapper;
 import org.graphbi.rdb2graph.util.config.NodeSuperClass;
+import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
 
 /**
  * Extracts and analyzes case graphs inside a given graph.
@@ -24,7 +24,7 @@ import org.graphbi.rdb2graph.util.config.NodeSuperClass;
 public class OperationGraphExtractor {
     private static Logger log = Logger.getLogger(OperationGraphExtractor.class);
 
-    private final GraphAnalysisWrapper graphDB;
+    private final ReadOnlyGraph graphDB;
     private final Database relationalDB;
 
     /*
@@ -32,7 +32,7 @@ public class OperationGraphExtractor {
      */
     private final Map<String, NodeSuperClass> nodeClassSuperClassMap;
 
-    public OperationGraphExtractor(GraphAnalysisWrapper graphWrapper,
+    public OperationGraphExtractor(ReadOnlyGraph graphWrapper,
 	    Map<String, NodeSuperClass> nodeClassSuperClassMap) {
 	if (graphWrapper == null) {
 	    throw new IllegalArgumentException("graphWrapper must not be null.");
@@ -42,7 +42,7 @@ public class OperationGraphExtractor {
 	this.nodeClassSuperClassMap = nodeClassSuperClassMap;
     }
 
-    public OperationGraphExtractor(GraphAnalysisWrapper graphWrapper,
+    public OperationGraphExtractor(ReadOnlyGraph graphWrapper,
 	    Database relationalDB) {
 	if (relationalDB == null) {
 	    throw new IllegalArgumentException(

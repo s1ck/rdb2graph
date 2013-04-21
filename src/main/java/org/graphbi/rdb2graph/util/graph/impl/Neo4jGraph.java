@@ -1,4 +1,4 @@
-package org.graphbi.rdb2graph.util.wrapper;
+package org.graphbi.rdb2graph.util.graph.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,10 +7,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.analysis.wrapper.GraphAnalysisWrapper;
-import org.graphbi.rdb2graph.transformation.wrapper.GraphTransformationWrapper;
 import org.graphbi.rdb2graph.util.config.Constants;
 import org.graphbi.rdb2graph.util.config.NodeSuperClass;
+import org.graphbi.rdb2graph.util.graph.ReadWriteGraph;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -21,9 +20,8 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.tooling.GlobalGraphOperations;
 
-public class NeoWrapper implements GraphTransformationWrapper,
-	GraphAnalysisWrapper {
-    private static Logger log = Logger.getLogger(NeoWrapper.class);
+public class Neo4jGraph implements ReadWriteGraph {
+    private static Logger log = Logger.getLogger(Neo4jGraph.class);
 
     /*
      * Used to the link instance nodes with reference / type nodes.
@@ -48,7 +46,7 @@ public class NeoWrapper implements GraphTransformationWrapper,
 
     private Map<String, Node> referenceNodes;
 
-    public NeoWrapper(GraphDatabaseService graphdb) {
+    public Neo4jGraph(GraphDatabaseService graphdb) {
 	this.graphdb = graphdb;
 	nodeIndex = graphdb.index().forNodes("nodes");
 	referenceIndex = graphdb.index().forNodes("references");

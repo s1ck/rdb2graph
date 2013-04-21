@@ -1,12 +1,11 @@
-package org.graphbi.rdb2graph.analysis.wrapper;
+package org.graphbi.rdb2graph.util.graph;
 
 import java.util.Map;
 import java.util.Set;
 
 import org.graphbi.rdb2graph.util.config.NodeSuperClass;
-import org.graphbi.rdb2graph.util.wrapper.GraphWrapper;
 
-public interface GraphAnalysisWrapper extends GraphWrapper {
+public interface ReadOnlyGraph extends Graph {
     /**
      * Returns the node's class (if the property has been set) else null.
      * 

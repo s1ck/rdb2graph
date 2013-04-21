@@ -4,17 +4,17 @@ import java.util.List;
 
 import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.analysis.wrapper.GraphAnalysisWrapper;
+import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
 
 public class OperationGraphAnalyzer {
 
     private static Logger log = Logger.getLogger(OperationGraphAnalyzer.class);
 
     private final Database relationalDB;
-    private final GraphAnalysisWrapper graphDB;
+    private final ReadOnlyGraph graphDB;
 
     public OperationGraphAnalyzer(Database relationalDB,
-	    GraphAnalysisWrapper graphDB) {
+	    ReadOnlyGraph graphDB) {
 	this.relationalDB = relationalDB;
 	this.graphDB = graphDB;
     }

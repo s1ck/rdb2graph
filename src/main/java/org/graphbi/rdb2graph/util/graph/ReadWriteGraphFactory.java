@@ -1,19 +1,17 @@
-package org.graphbi.rdb2graph.transformation.wrapper;
+package org.graphbi.rdb2graph.util.graph;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.util.config.DataSinkInfo;
-import org.graphbi.rdb2graph.util.wrapper.NeoWrapper;
+import org.graphbi.rdb2graph.util.graph.impl.Neo4jGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.neo4j.kernel.impl.util.FileUtils;
 
-public class GraphTransformationWrapperFactory {
-
-    private static Logger log = Logger
-	    .getLogger(GraphTransformationWrapperFactory.class);
+public class ReadWriteGraphFactory {
+    private static Logger log = Logger.getLogger(ReadWriteGraphFactory.class);
 
     /**
      * Returns an instance of GraphTransformationWrapper based on the
@@ -22,8 +20,7 @@ public class GraphTransformationWrapperFactory {
      * @param dataSinkInfo
      * @return
      */
-    public static GraphTransformationWrapper getInstance(
-	    DataSinkInfo dataSinkInfo) {
+    public static ReadWriteGraph getInstance(DataSinkInfo dataSinkInfo) {
 	if ("neo4j".equals(dataSinkInfo.getType())) {
 	    if (dataSinkInfo.getDrop()) {
 		try {
@@ -39,10 +36,11 @@ public class GraphTransformationWrapperFactory {
 		    .newEmbeddedDatabase(dataSinkInfo.getPath());
 	    registerShutdownHook(graphdb);
 	    log.info("Initialized Neo4j");
-	    return new NeoWrapper(graphdb);
+	    return new Neo4jGraph(graphdb);
 	} else {
-	    throw new IllegalArgumentException(
-		    "Only Neo4j is currently supported as datasink");
+	    throw new IllegalArgumentException("Configured graph database '"
+		    + dataSinkInfo.getType()
+		    + "' is not supported for read and write operations.");
 	}
     }
 
