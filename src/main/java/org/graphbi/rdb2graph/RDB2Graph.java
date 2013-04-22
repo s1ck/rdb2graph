@@ -101,13 +101,13 @@ public class RDB2Graph {
 	}
 
 	String cfgFile = cmd.hasOption(CONFIG_OPTION) ? cmd
-		.getOptionValue(CONFIG_OPTION) : "/config.xml";
+		.getOptionValue(CONFIG_OPTION) : "/config.properties";
 
 	Config cfg = new Config(RDB2Graph.class.getResource(cfgFile).getFile());
 	cfg.parse();
 
-	DataSourceInfo dataSourceInfo = cfg.getDataSourceInfo();
-	DataSinkInfo dataSinkInfo = cfg.getDataSinkInfo();
+	DataSourceInfo dataSourceInfo = cfg.getRelationalStore();
+	DataSinkInfo dataSinkInfo = cfg.getGraphStore();
 
 	// set up relational database system
 	Platform rdbs = RelationalDatabasePlatformFactory
