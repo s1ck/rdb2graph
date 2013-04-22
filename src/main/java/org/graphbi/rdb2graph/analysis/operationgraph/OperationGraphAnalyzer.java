@@ -10,11 +10,12 @@ public class OperationGraphAnalyzer {
 
     private static Logger log = Logger.getLogger(OperationGraphAnalyzer.class);
 
+    @SuppressWarnings("unused")
     private final Database relationalDB;
+    @SuppressWarnings("unused")
     private final ReadOnlyGraph graphDB;
 
-    public OperationGraphAnalyzer(Database relationalDB,
-	    ReadOnlyGraph graphDB) {
+    public OperationGraphAnalyzer(Database relationalDB, ReadOnlyGraph graphDB) {
 	this.relationalDB = relationalDB;
 	this.graphDB = graphDB;
     }
@@ -33,8 +34,6 @@ public class OperationGraphAnalyzer {
 	float avgNodeCount = 0f;
 	float avgEdgeCount = 0f;
 
-	int i = 0;
-
 	for (OperationGraph opGraph : opGraphs) {
 	    localNodeCount = opGraph.getNodes().size();
 	    localEdgeCount = opGraph.getEdges().size();
@@ -52,18 +51,6 @@ public class OperationGraphAnalyzer {
 	    }
 	    nodeSum += localNodeCount;
 	    edgeSum += localEdgeCount;
-
-	    // System.out.println(String.format("OpGraph %d", ++i));
-	    // for (Long nodeId : opGraph.getNodes()) {
-	    // node = gdb.getNodeById(nodeId);
-	    // if (node.hasProperty(Constants.ID_KEY)) {
-	    // System.out.println(String.format("\t%d \t %s",
-	    // node.getId(),
-	    // node.getProperty(Constants.ID_KEY)));
-	    // } else {
-	    // System.out.println("check this node: " + node);
-	    // }
-	    // }
 	}
 
 	avgNodeCount = nodeSum / (float) n;

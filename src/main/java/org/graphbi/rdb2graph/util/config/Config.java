@@ -44,6 +44,12 @@ public class Config {
 
 	    parseDatasource();
 	    parseGraphStore();
+	    // parse optional opgraphstore
+	    if (props.getProperty("opgraphstore.type") != null) {
+		parseOpGraphStore();
+	    } else {
+		opGraphStore = null;
+	    }
 	} catch (FileNotFoundException e) {
 	    e.printStackTrace();
 	    log.error(e);
@@ -52,34 +58,58 @@ public class Config {
 	}
     }
 
-    private void parseDatasource() {
-	relationalStore = new DataSourceInfo(
-		props.getProperty("datasource.type"),
-		props.getProperty("datasource.host"), Integer.parseInt(props
-			.getProperty("datasource.port")),
-		props.getProperty("datasource.db"),
-		props.getProperty("datasource.user"),
-		props.getProperty("datasource.password"),
-		Boolean.parseBoolean(props.getProperty("datasource.useSchema",
-			"false")), Boolean.parseBoolean(props.getProperty(
-			"datasource.useDelimiter", "false")));
-    }
-
-    private void parseGraphStore() {
-	graphStore = new DataSinkInfo(props.getProperty("datasink.type"),
-		props.getProperty("datasink.path"), Boolean.parseBoolean(props
-			.getProperty("datasink.drop", "false")));
-    }
-
+    /**
+     * Returns connection information about the relational store.
+     * 
+     * @return Information about the relational database.
+     */
     public DataSourceInfo getRelationalStore() {
 	return this.relationalStore;
     }
 
+    /**
+     * Returns connection information about the graph store.
+     * 
+     * @return Information about the graph database.
+     */
     public DataSinkInfo getGraphStore() {
 	return this.graphStore;
     }
 
+    /**
+     * Returns connection infomation about the operation graph store or null if
+     * none was configured.
+     * 
+     * @return Information about the opgraph database or null.
+     */
     public DataSinkInfo getOpGraphStore() {
 	return this.opGraphStore;
+    }
+
+    private void parseDatasource() {
+	relationalStore = new DataSourceInfo(
+		props.getProperty("relstore.type"),
+		props.getProperty("relstore.host"), Integer.parseInt(props
+			.getProperty("relstore.port")),
+		props.getProperty("relstore.db"),
+		props.getProperty("relstore.user"),
+		props.getProperty("relstore.password"),
+		Boolean.parseBoolean(props.getProperty("relstore.useSchema",
+			"false")), Boolean.parseBoolean(props.getProperty(
+			"relstore.useDelimiter", "false")));
+    }
+
+    private void parseGraphStore() {
+	graphStore = new DataSinkInfo(props.getProperty("graphstore.type"),
+		props.getProperty("graphstore.path"),
+		Boolean.parseBoolean(props.getProperty("graphstore.drop",
+			"false")));
+    }
+
+    private void parseOpGraphStore() {
+	opGraphStore = new DataSinkInfo(props.getProperty("opgraphstore.type"),
+		props.getProperty("opgraphstore.path"),
+		Boolean.parseBoolean(props.getProperty("opgraphstore.drop",
+			"false")));
     }
 }

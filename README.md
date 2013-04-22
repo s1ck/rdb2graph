@@ -16,7 +16,7 @@ Usage
 
 Config: 
 
-* copy resources/sample-config.xml to resources/config.xml and look inside for details
+* copy resources/sakila-sample-config.properties to resources/config.properties and look inside for details
 
 Install: 
 
