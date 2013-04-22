@@ -21,13 +21,19 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.tooling.GlobalGraphOperations;
 
+/**
+ * A wrapper for Neo4j.
+ * 
+ * @author Martin Junghanns
+ * 
+ */
 public class Neo4jGraph implements ReadWriteGraph {
     private static Logger log = Logger.getLogger(Neo4jGraph.class);
 
     /*
-     * Used to the link instance nodes with reference / type nodes.
+     * Used to link instance nodes with reference / type nodes.
      * 
-     * @author s1ck
+     * @author Martin Junghanns
      */
     private static enum RelTypes implements RelationshipType {
 	INSTANCE
@@ -58,7 +64,7 @@ public class Neo4jGraph implements ReadWriteGraph {
     public GraphDatabaseService getGraphDB() {
 	return graphdb;
     }
-    
+
     public void beginTransaction() {
 	if (tx == null) {
 	    tx = graphdb.beginTx();
@@ -133,68 +139,15 @@ public class Neo4jGraph implements ReadWriteGraph {
     public Long createRelationship(final Long sourceID, final Long targetID,
 	    final String relType, final Map<String, Object> properties) {
 	Node source = null, target = null;
-	try {
-	    source = graphdb.getNodeById(sourceID);
-	    target = graphdb.getNodeById(targetID);
-	} catch (NotFoundException ex) {
-	    log.error(ex);
+	if (sourceID != null && targetID != null) {
+	    try {
+		source = graphdb.getNodeById(sourceID);
+		target = graphdb.getNodeById(targetID);
+	    } catch (NotFoundException ex) {
+		log.error(ex);
+	    }
 	}
 	return createRelationship(source, target, relType, null);
-    }
-
-    /**
-     * Creates a relationship between two given nodes (if they exist).
-     * 
-     * @param source
-     *            Relationship's source node.
-     * @param target
-     *            Relationship's target node.
-     * @param relType
-     *            Relationship's type.
-     * @param properties
-     *            Relationship's properties as key-value-pairs.
-     * 
-     * @return The system specific relationship id or null if one of the
-     *         incident nodes was null.
-     */
-    private Long createRelationship(final Node source, final Node target,
-	    final String relType, final Map<String, Object> properties) {
-	if (source != null && target != null) {
-	    log.debug(String.format("Connecting %s and %s", source, target));
-	    Relationship rel = source.createRelationshipTo(target,
-		    DynamicRelationshipType.withName(relType));
-	    if (properties != null) {
-		for (Entry<String, Object> p : properties.entrySet()) {
-		    rel.setProperty(p.getKey(), getSupportedType(p.getValue()));
-		}
-	    }
-	    return rel.getId();
-	}
-	return null;
-    }
-
-    private Node getReferenceNode(String type) {
-	return (referenceNodes.containsKey(type)) ? referenceNodes.get(type)
-		: createReferenceNode(type);
-    }
-
-    private Node createReferenceNode(String type) {
-	Node refNode = graphdb.createNode();
-	refNode.setProperty(REFERENCE_KEY, type);
-	referenceNodes.put(type, refNode);
-	referenceIndex.add(refNode, REFERENCE_KEY, type);
-	return refNode;
-    }
-
-    private Object getSupportedType(Object o) {
-	if (o instanceof Boolean || o instanceof Byte || o instanceof Short
-		|| o instanceof Integer || o instanceof Long
-		|| o instanceof Float || o instanceof Double
-		|| o instanceof Character || o instanceof String) {
-	    return o;
-	} else {
-	    return o.toString();
-	}
     }
 
     @Override
@@ -260,5 +213,60 @@ public class Neo4jGraph implements ReadWriteGraph {
 	    nodes.add(e.getEndNode().getId());
 	}
 	return nodes;
+    }
+
+    /**
+     * Creates a relationship between two given nodes (if they exist).
+     * 
+     * @param source
+     *            Relationship's source node.
+     * @param target
+     *            Relationship's target node.
+     * @param relType
+     *            Relationship's type.
+     * @param properties
+     *            Relationship's properties as key-value-pairs.
+     * 
+     * @return The system specific relationship id or null if one of the
+     *         incident nodes was null.
+     */
+    private Long createRelationship(final Node source, final Node target,
+	    final String relType, final Map<String, Object> properties) {
+	if (source != null && target != null) {
+	    log.debug(String.format("Connecting %s and %s", source, target));
+	    Relationship rel = source.createRelationshipTo(target,
+		    DynamicRelationshipType.withName(relType));
+	    if (properties != null) {
+		for (Entry<String, Object> p : properties.entrySet()) {
+		    rel.setProperty(p.getKey(), getSupportedType(p.getValue()));
+		}
+	    }
+	    return rel.getId();
+	}
+	return null;
+    }
+
+    private Node getReferenceNode(String type) {
+	return (referenceNodes.containsKey(type)) ? referenceNodes.get(type)
+		: createReferenceNode(type);
+    }
+
+    private Node createReferenceNode(String type) {
+	Node refNode = graphdb.createNode();
+	refNode.setProperty(REFERENCE_KEY, type);
+	referenceNodes.put(type, refNode);
+	referenceIndex.add(refNode, REFERENCE_KEY, type);
+	return refNode;
+    }
+
+    private Object getSupportedType(Object o) {
+	if (o instanceof Boolean || o instanceof Byte || o instanceof Short
+		|| o instanceof Integer || o instanceof Long
+		|| o instanceof Float || o instanceof Double
+		|| o instanceof Character || o instanceof String) {
+	    return o;
+	} else {
+	    return o.toString();
+	}
     }
 }

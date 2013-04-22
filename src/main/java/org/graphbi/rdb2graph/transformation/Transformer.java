@@ -1,6 +1,7 @@
 package org.graphbi.rdb2graph.transformation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -21,8 +22,6 @@ import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.Constants;
 import org.graphbi.rdb2graph.util.graph.ReadWriteGraph;
 
-import scala.actors.threadpool.Arrays;
-
 public class Transformer {
 
     private static Logger log = Logger.getLogger(Transformer.class);
@@ -38,6 +37,9 @@ public class Transformer {
 
     private long rowCnt;
     private long linkCnt;
+
+    private Map<String, Long> nodeIdx;
+    private Map<String, Long> edgeIdx;
 
     private final boolean useSchema;
     private final boolean useDelimiters;
@@ -57,6 +59,9 @@ public class Transformer {
 	this.rowCnt = 0;
 	this.linkCnt = 0;
 
+	this.nodeIdx = new HashMap<String, Long>();
+	this.edgeIdx = new HashMap<String, Long>();
+
 	this.useSchema = useSchema;
 	this.useDelimiters = useDelimiters;
     }
@@ -70,8 +75,6 @@ public class Transformer {
 	transformTables(relDatabase.getTables());
 	// foreign keys (1:n)
 	transformForeignKeys(relDatabase.getTables());
-	// link tables (n:m)
-	// transformLinkTables(relDatabase.getTables());
 
 	sw.stop();
 	log.info(String
@@ -141,7 +144,9 @@ public class Transformer {
 
 	// store non-pk properties
 	Map<String, Object> properties = null;
-	DynaBean row;
+	DynaBean row = null;
+	Long nodeId = null;
+	String primaryNodeKey = null;
 
 	// process all rows and create nodes in one tx for better performance
 	graphDatabase.beginTransaction();
@@ -152,8 +157,8 @@ public class Transformer {
 	    // meta
 	    properties.put(Constants.SOURCE_KEY, relDatabase.getName());
 	    properties.put(Constants.CLASS_KEY, getTableIdentifier(table));
-	    properties
-		    .put(Constants.ID_KEY, getPrimaryKeyNodeValue(table, row));
+	    primaryNodeKey = getPrimaryNodeKeyValue(table, row);
+	    properties.put(Constants.ID_KEY, primaryNodeKey);
 
 	    // read all non-pk properties (including foreign keys)
 	    for (Column c : propertyCols) {
@@ -163,7 +168,8 @@ public class Transformer {
 		}
 	    }
 	    // create new node based on the given properties
-	    if (graphDatabase.createNode(properties) != null) {
+	    if ((nodeId = graphDatabase.createNode(properties)) != null) {
+		nodeIdx.put(primaryNodeKey, nodeId);
 		rowCnt++;
 		rowsPassed++;
 	    } else {
@@ -225,11 +231,13 @@ public class Transformer {
 		StringUtils.join(getLinkColumns(table).iterator(), ","),
 		getFormattedTableName(table));
 	Iterator it = platform.query(relDatabase, query);
-	DynaBean row;
-	String pkLocal, pkForeign;
+	DynaBean row = null;
+	String pkLocal = null, pkForeign = null;
 	Map<String, Object> properties = null;
-	String foreignIdString;
-	Object tmpValue;
+	String foreignIdString = null;
+	Object tmpValue = null;
+	String primaryEdgeKey = null;
+	Long edgeId = null;
 	int i = 0;
 
 	// process the creation of all links in one tx for better performance
@@ -238,7 +246,7 @@ public class Transformer {
 	    row = (DynaBean) it.next();
 	    // create all links for the current row
 	    // local node key
-	    pkLocal = getPrimaryKeyNodeValue(table, row);
+	    pkLocal = getPrimaryNodeKeyValue(table, row);
 	    for (ForeignKey fk : table.getForeignKeys()) {
 		foreignIdString = "";
 		i = 0;
@@ -265,10 +273,13 @@ public class Transformer {
 		    properties.put(Constants.SOURCE_KEY, relDatabase.getName());
 		    properties.put(Constants.CLASS_KEY,
 			    getForeignKeyIdentifier(fk));
-		    properties.put(Constants.ID_KEY,
-			    getPrimaryKeyLinkValue(fk, pkLocal, pkForeign));
-		    if (graphDatabase.createRelationship(pkLocal, pkForeign,
-			    fk.getEdgeClass(), properties) != null) {
+		    primaryEdgeKey = getPrimaryEdgeKeyValue(fk, pkLocal,
+			    pkForeign);
+		    properties.put(Constants.ID_KEY, primaryEdgeKey);
+		    if ((edgeId = graphDatabase.createRelationship(
+			    nodeIdx.get(pkLocal), nodeIdx.get(pkForeign),
+			    fk.getEdgeClass(), properties)) != null) {
+			edgeIdx.put(primaryEdgeKey, edgeId);
 			linkCnt++;
 			linksPassed++;
 		    } else {
@@ -321,7 +332,7 @@ public class Transformer {
      *            Row
      * @return Internally used primary key for the given row.
      */
-    private String getPrimaryKeyNodeValue(final Table t, final DynaBean row) {
+    private String getPrimaryNodeKeyValue(final Table t, final DynaBean row) {
 	String primaryKey = formatKeyCandidate(getTableIdentifier(t));
 	for (Column c : t.getPrimaryKeyColumns()) {
 	    primaryKey += "_" + row.get(c.getName());
@@ -340,7 +351,7 @@ public class Transformer {
      *            Internal id of the target node
      * @return
      */
-    private String getPrimaryKeyLinkValue(final ForeignKey fk,
+    private String getPrimaryEdgeKeyValue(final ForeignKey fk,
 	    final String sourceId, final String targetId) {
 	return String.format("%s_%s_%s", getForeignKeyIdentifier(fk), sourceId,
 		targetId);
