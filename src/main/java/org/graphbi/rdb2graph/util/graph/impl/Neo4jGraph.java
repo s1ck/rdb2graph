@@ -14,6 +14,7 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -57,7 +58,7 @@ public class Neo4jGraph implements ReadWriteGraph {
     public GraphDatabaseService getGraphDB() {
 	return graphdb;
     }
-
+    
     public void beginTransaction() {
 	if (tx == null) {
 	    tx = graphdb.beginTx();
@@ -90,7 +91,7 @@ public class Neo4jGraph implements ReadWriteGraph {
      * @param properties
      *            Properties for the new node.
      */
-    public boolean createNode(final Map<String, Object> properties) {
+    public Long createNode(final Map<String, Object> properties) {
 	String type = (String) properties.get(Constants.CLASS_KEY);
 	Node refNode = getReferenceNode(type);
 	// create node
@@ -104,22 +105,60 @@ public class Neo4jGraph implements ReadWriteGraph {
 	refNode.createRelationshipTo(node, RelTypes.INSTANCE);
 
 	log.debug(String.format("Created Neo4j node: %s", node));
-	return node != null;
+	return node.getId();
     }
 
-    public boolean createRelationship(final String sourceID,
+    @Override
+    public Long createRelationship(final String sourceID,
 	    final String targetID, final String relType) {
 	return createRelationship(sourceID, targetID, relType, null);
     }
 
-    /**
-     * Creates a link between to given nodes if those node exist.
-     */
-    public boolean createRelationship(final String sourceID,
+    @Override
+    public Long createRelationship(final String sourceID,
 	    final String targetID, final String relType,
 	    final Map<String, Object> properties) {
 	Node source = nodeIndex.get(Constants.ID_KEY, sourceID).getSingle();
 	Node target = nodeIndex.get(Constants.ID_KEY, targetID).getSingle();
+	return createRelationship(source, target, relType, null);
+    }
+
+    @Override
+    public Long createRelationship(final Long sourceID, final Long targetID,
+	    final String relType) {
+	return createRelationship(sourceID, targetID, relType, null);
+    }
+
+    @Override
+    public Long createRelationship(final Long sourceID, final Long targetID,
+	    final String relType, final Map<String, Object> properties) {
+	Node source = null, target = null;
+	try {
+	    source = graphdb.getNodeById(sourceID);
+	    target = graphdb.getNodeById(targetID);
+	} catch (NotFoundException ex) {
+	    log.error(ex);
+	}
+	return createRelationship(source, target, relType, null);
+    }
+
+    /**
+     * Creates a relationship between two given nodes (if they exist).
+     * 
+     * @param source
+     *            Relationship's source node.
+     * @param target
+     *            Relationship's target node.
+     * @param relType
+     *            Relationship's type.
+     * @param properties
+     *            Relationship's properties as key-value-pairs.
+     * 
+     * @return The system specific relationship id or null if one of the
+     *         incident nodes was null.
+     */
+    private Long createRelationship(final Node source, final Node target,
+	    final String relType, final Map<String, Object> properties) {
 	if (source != null && target != null) {
 	    log.debug(String.format("Connecting %s and %s", source, target));
 	    Relationship rel = source.createRelationshipTo(target,
@@ -129,30 +168,9 @@ public class Neo4jGraph implements ReadWriteGraph {
 		    rel.setProperty(p.getKey(), getSupportedType(p.getValue()));
 		}
 	    }
-	    return true;
-	} else {
-	    if (source == null) {
-		log.error(String
-			.format("Error during creation of relationship with type '%s': Source node '%s' not found in index",
-				relType, sourceID));
-	    }
-	    if (target == null) {
-		log.error(String
-			.format("Error during creation of relationship with type '%s': Target node '%s' not found in index",
-				relType, targetID));
-	    }
+	    return rel.getId();
 	}
-	return false;
-    }
-
-    public void printNodes(String type) {
-	Node refNode = referenceIndex.get(REFERENCE_KEY, type).getSingle();
-	if (refNode != null) {
-	    for (Relationship edge : refNode.getRelationships(
-		    Direction.OUTGOING, RelTypes.INSTANCE)) {
-		System.out.println("\t" + edge.getEndNode());
-	    }
-	}
+	return null;
     }
 
     private Node getReferenceNode(String type) {

@@ -163,7 +163,7 @@ public class Transformer {
 		}
 	    }
 	    // create new node based on the given properties
-	    if (graphDatabase.createNode(properties)) {
+	    if (graphDatabase.createNode(properties) != null) {
 		rowCnt++;
 		rowsPassed++;
 	    } else {
@@ -268,7 +268,7 @@ public class Transformer {
 		    properties.put(Constants.ID_KEY,
 			    getPrimaryKeyLinkValue(fk, pkLocal, pkForeign));
 		    if (graphDatabase.createRelationship(pkLocal, pkForeign,
-			    fk.getEdgeClass(), properties)) {
+			    fk.getEdgeClass(), properties) != null) {
 			linkCnt++;
 			linksPassed++;
 		    } else {

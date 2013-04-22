@@ -7,28 +7,72 @@ public interface ReadWriteGraph extends ReadOnlyGraph {
      * Creates a node in the graph with the given properties.
      * 
      * @param properties
-     * @return True, if the node has been created.
+     *            Node's properties.
+     * @return The node's system specific id if it has been created else null.
      */
-    boolean createNode(final Map<String, Object> properties);
+    Long createNode(final Map<String, Object> properties);
+
     /**
-     * Creates a relationship (edge) between two existing nodes in the graph.
+     * Creates a relationship based on the system specific id value.
      * 
      * @param sourceID
+     *            System specific source node id.
      * @param targetID
+     *            System specifig target node id.
      * @param relType
-     * @return True, if the edge has been created.
+     *            Relationship type.
+     * @return The relationship's system specific id if it has been created else
+     *         null.
      */
-    boolean createRelationship(final String sourceID, final String targetID,
+    Long createRelationship(final Long sourceID, final Long targetID,
 	    final String relType);
+
     /**
-     * Creates a relationship (edge) between two existing nodes in the graph.
+     * Creates a relationship and it's properties based on the system specific
+     * id value.
      * 
      * @param sourceID
+     *            System specific source node id.
      * @param targetID
+     *            System specifig target node id.
      * @param relType
-     * @param properties
-     * @return True, if the edge has been created.
+     *            Relationship type.
+     * @return The relationship's system specific id if it has been created else
+     *         null.
      */
-    boolean createRelationship(final String sourceID, final String targetID,
+    Long createRelationship(final Long sourceID, final Long targetID,
+	    final String relType, Map<String, Object> properties);
+
+    /**
+     * Creates a relationship based on the rdb2graph based ID-property value.
+     * 
+     * @param sourceID
+     *            Source node's rdb2graph ID value.
+     * @param targetID
+     *            Target node's rdb2graph ID value.
+     * @param relType
+     *            Relationship type.
+     * @return The relationship's system specific id if it has been created else
+     *         null.
+     */
+    Long createRelationship(final String sourceID, final String targetID,
+	    final String relType);
+
+    /**
+     * Creates a relationship and it's properties based on the rdb2graph based
+     * ID-property value.
+     * 
+     * @param sourceID
+     *            Source node's rdb2graph ID value.
+     * @param targetID
+     *            Target node's rdb2graph ID value.
+     * @param relType
+     *            Relationship type.
+     * @param properties
+     *            Relationship's properties.
+     * @return The relationship's system specific id if it has been created else
+     *         null.
+     */
+    Long createRelationship(final String sourceID, final String targetID,
 	    final String relType, final Map<String, Object> properties);
 }
