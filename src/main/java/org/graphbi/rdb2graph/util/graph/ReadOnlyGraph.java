@@ -12,7 +12,34 @@ public interface ReadOnlyGraph extends Graph {
      * @param nodeId
      * @return The node's class or null if it's not defined.
      */
-    public String getNodeClass(Long nodeId);
+    String getNodeClass(Long nodeId);
+
+    /**
+     * Returns the properties of a given node or null if the node doesn't exist.
+     * 
+     * @param nodeId
+     *            The system specific node id.
+     * @return The node's properties or null if the node doesn't exist.
+     */
+    Map<String, Object> getNodeProperties(Long nodeId);
+
+    /**
+     * Returns the properties of a given edge or null if the edge doesn't exist.
+     * 
+     * @param edgeId
+     *            The system specific edge id.
+     * @return The edge's properties or null if the edge doesn't exist.
+     */
+    Map<String, Object> getEdgeProperties(Long edgeId);
+
+    /**
+     * Returns the type of the given edge.
+     * 
+     * @param edgeId
+     *            The edge's system specific id.
+     * @return The edge type or null if the edge doesn't exist.
+     */
+    String getEdgeType(Long edgeId);
 
     /**
      * Returns a set of nodeId's which belong to a given superclass
@@ -21,17 +48,18 @@ public interface ReadOnlyGraph extends Graph {
      * @param nodeClass
      * @return
      */
-    public Set<Long> getNodesBySuperClass(
-	    Map<String, NodeSuperClass> typeClassMap, NodeSuperClass nodeClass);
+    Set<Long> getNodesBySuperClass(Map<String, NodeSuperClass> typeClassMap,
+	    NodeSuperClass nodeClass);
 
     /**
      * Returns all nodes connected to the given edge.
      * 
      * @param edgeId
      *            The edge's id
-     * @return A set of node ids.
+     * @return Edge information containing source node's id and target node's
+     *         id.
      */
-    public Set<Long> getIncidentNodes(Long edgeId);
+    Long[] getIncidentNodes(Long edgeId);
 
     /**
      * Returns all adjacent nodes of the given node regardless of the edge's
@@ -40,7 +68,7 @@ public interface ReadOnlyGraph extends Graph {
      * @param nodeId
      * @return A set of adjacent nodes of nodeId
      */
-    public Set<Long> getAdjacentNodes(Long nodeId);
+    Set<Long> getAdjacentNodes(Long nodeId);
 
     /**
      * Returns all incident edges of the given node.
@@ -48,7 +76,7 @@ public interface ReadOnlyGraph extends Graph {
      * @param nodeId
      * @return A set of incident edges of nodeId
      */
-    public Set<Long> getIncidentEdges(Long nodeId);
+    Set<Long> getIncidentEdges(Long nodeId);
 
     /**
      * Returns all incident edges of the given node.
@@ -60,5 +88,5 @@ public interface ReadOnlyGraph extends Graph {
      *            this parameter.
      * @return A set of incident edges of nodeId
      */
-    public Set<Long> getIncidentEdges(Long nodeId, boolean skipInstance);
+    Set<Long> getIncidentEdges(Long nodeId, boolean skipInstance);
 }

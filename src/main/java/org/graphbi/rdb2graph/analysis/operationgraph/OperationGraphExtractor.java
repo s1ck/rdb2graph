@@ -97,8 +97,10 @@ public class OperationGraphExtractor {
 	OperationGraph opGraph = null;
 	// E_c
 	Set<Long> incidentEdges = null;
-	// set of v_n
-	Set<Long> nextCandidateSet = null;
+	// Array of v_n candidates
+	Long[] nextCandidates = null;
+	// v_n
+	Long nextCandidate = null;
 
 	while ((discoveryStartNode = globalCandidatesQueue.peek()) != null) {
 	    // create new operation graph
@@ -115,21 +117,20 @@ public class OperationGraphExtractor {
 		// remove all edges already stored in the operation graph
 		incidentEdges.removeAll(opGraph.getEdges());
 		for (Long edgeId : incidentEdges) {
-		    nextCandidateSet = graphDB.getIncidentNodes(edgeId);
-		    nextCandidateSet.remove(discoveryNode);
-		    // should be one left
-		    for (Long nextCandidate : nextCandidateSet) {
-			if (!opGraph.getNodes().contains(nextCandidate)) {
-			    opGraph.addNode(nextCandidate);
-			    String nodeClass = graphDB
-				    .getNodeClass(nextCandidate);
-			    if (nodeClass != null
-				    && nodeClassSuperClassMap
-					    .containsKey(nodeClass)
-				    && nodeClassSuperClassMap.get(nodeClass)
-					    .equals(NodeSuperClass.DOCUMENT)) {
-				operationCandidatesQueue.add(nextCandidate);
-			    }
+		    nextCandidates = graphDB.getIncidentNodes(edgeId);
+		    // assuming that there are only two nodes connected to that
+		    // edge
+		    nextCandidate = (nextCandidates[0] == discoveryNode) ? nextCandidates[1]
+			    : nextCandidates[0];
+		    if (!opGraph.getNodes().contains(nextCandidate)) {
+			opGraph.addNode(nextCandidate);
+			String nodeClass = graphDB.getNodeClass(nextCandidate);
+			if (nodeClass != null
+				&& nodeClassSuperClassMap
+					.containsKey(nodeClass)
+				&& nodeClassSuperClassMap.get(nodeClass)
+					.equals(NodeSuperClass.DOCUMENT)) {
+			    operationCandidatesQueue.add(nextCandidate);
 			}
 		    }
 		    opGraph.addEdge(edgeId);

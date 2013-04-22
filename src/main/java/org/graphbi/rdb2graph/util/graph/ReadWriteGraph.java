@@ -13,6 +13,17 @@ public interface ReadWriteGraph extends ReadOnlyGraph {
     Long createNode(final Map<String, Object> properties);
 
     /**
+     * Creates a node in the graph with the given properties.
+     * 
+     * @param properties
+     *            Node's properties
+     * @param useIndex
+     *            True, if the node's rdb2graph id shall be indexed.
+     * @return The node's system specific id if it has been created else null.
+     */
+    Long createNode(final Map<String, Object> properties, boolean useIndex);
+
+    /**
      * Creates a relationship based on the system specific id value.
      * 
      * @param sourceID

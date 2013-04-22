@@ -15,6 +15,7 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
+import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
@@ -40,9 +41,13 @@ public class Neo4jGraph implements ReadWriteGraph {
     }
 
     /*
-     * Used in the reference node index to retrieve content.
+     * Used in the reference node index as key in the key/value pair for a node.
      */
     private static final String REFERENCE_KEY = "reference";
+    /*
+     * Used in the nodes index as key in the key/value pair for a node.
+     */
+    private static final String NODE_KEY = "rdb2graph_id";
 
     private final GraphDatabaseService graphdb;
 
@@ -55,8 +60,8 @@ public class Neo4jGraph implements ReadWriteGraph {
 
     public Neo4jGraph(GraphDatabaseService graphdb) {
 	this.graphdb = graphdb;
-	nodeIndex = graphdb.index().forNodes("nodes");
-	referenceIndex = graphdb.index().forNodes("references");
+	nodeIndex = graphdb.index().forNodes("Instances");
+	referenceIndex = graphdb.index().forNodes("References");
 
 	referenceNodes = new HashMap<String, Node>();
     }
@@ -90,14 +95,14 @@ public class Neo4jGraph implements ReadWriteGraph {
 	}
     }
 
-    /**
-     * Creates a Node based on the given properties. If the reference node for
-     * the given type doesn't exist, it will be created and indexed.
-     * 
-     * @param properties
-     *            Properties for the new node.
-     */
+    @Override
     public Long createNode(final Map<String, Object> properties) {
+	return createNode(properties, true);
+    }
+
+    @Override
+    public Long createNode(final Map<String, Object> properties,
+	    boolean useIndex) {
 	String type = (String) properties.get(Constants.CLASS_KEY);
 	Node refNode = getReferenceNode(type);
 	// create node
@@ -105,7 +110,9 @@ public class Neo4jGraph implements ReadWriteGraph {
 	for (Map.Entry<String, Object> e : properties.entrySet()) {
 	    node.setProperty(e.getKey(), getSupportedType(e.getValue()));
 	}
-	nodeIndex.add(node, Constants.ID_KEY, properties.get(Constants.ID_KEY));
+	if (useIndex) {
+	    nodeIndex.add(node, NODE_KEY, properties.get(Constants.ID_KEY));
+	}
 
 	// create edge between refNode and new node
 	refNode.createRelationshipTo(node, RelTypes.INSTANCE);
@@ -124,8 +131,8 @@ public class Neo4jGraph implements ReadWriteGraph {
     public Long createRelationship(final String sourceID,
 	    final String targetID, final String relType,
 	    final Map<String, Object> properties) {
-	Node source = nodeIndex.get(Constants.ID_KEY, sourceID).getSingle();
-	Node target = nodeIndex.get(Constants.ID_KEY, targetID).getSingle();
+	Node source = nodeIndex.get(NODE_KEY, sourceID).getSingle();
+	Node target = nodeIndex.get(NODE_KEY, targetID).getSingle();
 	return createRelationship(source, target, relType, null);
     }
 
@@ -197,12 +204,12 @@ public class Neo4jGraph implements ReadWriteGraph {
     }
 
     @Override
-    public Set<Long> getIncidentNodes(Long edgeId) {
-	Set<Long> nodes = new HashSet<Long>();
+    public Long[] getIncidentNodes(Long edgeId) {
+	if (edgeId == null) {
+	    throw new IllegalArgumentException("edgeId must not be null.");
+	}
 	Relationship e = graphdb.getRelationshipById(edgeId);
-	nodes.add(e.getStartNode().getId());
-	nodes.add(e.getEndNode().getId());
-	return nodes;
+	return new Long[] { e.getStartNode().getId(), e.getEndNode().getId() };
     }
 
     @Override
@@ -213,6 +220,61 @@ public class Neo4jGraph implements ReadWriteGraph {
 	    nodes.add(e.getEndNode().getId());
 	}
 	return nodes;
+    }
+
+    @Override
+    public Map<String, Object> getNodeProperties(Long nodeId) {
+	if (nodeId == null) {
+	    throw new IllegalArgumentException("nodeId must not be null");
+	}
+	try {
+	    return getProperties(graphdb.getNodeById(nodeId));
+	} catch (NotFoundException ex) {
+	    log.error(ex);
+	}
+	return null;
+    }
+
+    @Override
+    public Map<String, Object> getEdgeProperties(Long edgeId) {
+	if (edgeId == null) {
+	    throw new IllegalArgumentException("edgeId must not be null");
+	}
+	try {
+	    return getProperties(graphdb.getRelationshipById(edgeId));
+	} catch (NotFoundException ex) {
+	    log.error(ex);
+	}
+	return null;
+    }
+
+    @Override
+    public String getEdgeType(Long edgeId) {
+	if (edgeId == null) {
+	    throw new IllegalArgumentException("edgeId must not be null");
+	}
+	try {
+	    return graphdb.getRelationshipById(edgeId).getType().toString();
+	} catch (NotFoundException ex) {
+	    log.error(ex);
+	}
+	return null;
+    }
+
+    /**
+     * Returns a Map of the properties of a node / relationship.
+     * 
+     * @param propContainer
+     *            Node or Relationship
+     * 
+     * @return Node's / Relationship's properties.
+     */
+    private Map<String, Object> getProperties(PropertyContainer propContainer) {
+	Map<String, Object> res = new HashMap<String, Object>();
+	for (String propKey : propContainer.getPropertyKeys()) {
+	    res.put(propKey, propContainer.getProperty(propKey));
+	}
+	return res;
     }
 
     /**

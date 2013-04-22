@@ -1,0 +1,7 @@
+# all possible paths between two nodes up to length 4 and no INSTANCE edges
+# variable for edge-set doesn't work with allShortestPath :/
+start a = node(3311), b = node(3309) 
+match p = a-[r*..4]-b 
+where NOT ANY(e in r where TYPE(e) = "INSTANCE") 
+return EXTRACT( n in RELS(p): TYPE(n)) 
+order by length(p) ASC; 
