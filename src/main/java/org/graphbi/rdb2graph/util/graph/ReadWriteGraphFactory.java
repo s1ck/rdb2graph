@@ -21,6 +21,10 @@ public class ReadWriteGraphFactory {
      * @return
      */
     public static ReadWriteGraph getInstance(DataSinkInfo dataSinkInfo) {
+	if (dataSinkInfo == null) {
+	    throw new IllegalArgumentException(
+		    "No datasink information defined.");
+	}
 	if ("neo4j".equals(dataSinkInfo.getType())) {
 	    if (dataSinkInfo.getDrop()) {
 		try {

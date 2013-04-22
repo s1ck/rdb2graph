@@ -56,11 +56,12 @@ public class OperationGraphAnalyzer {
 	avgNodeCount = nodeSum / (float) n;
 	avgEdgeCount = edgeSum / (float) n;
 
-	log.info(String.format("\nAnalyzed %d operation graphs.\n"
-		+ "Average node count: %.2f\n" + "Average edge count: %.2f\n"
-		+ "Maximum node count: %d\n" + "Maximum edge count: %d\n"
-		+ "Minimum node count: %d\n" + "Minimum edge count: %d\n", n,
-		avgNodeCount, avgEdgeCount, maxNodeCount, maxEdgeCount,
-		minNodeCount, minEdgeCount));
+	log.info(String.format("Analyzed %d operation graphs.", n));
+	log.info(String.format("Average node count: %.2f", avgNodeCount));
+	log.info(String.format("Average edge count: %.2f", avgEdgeCount));
+	log.info(String.format("Maximum node count: %d", maxNodeCount));
+	log.info(String.format("Maximum edge count: %d", maxEdgeCount));
+	log.info(String.format("Minimum node count: %d", minNodeCount));
+	log.info(String.format("Minimum edge count: %d", minEdgeCount));
     }
 }

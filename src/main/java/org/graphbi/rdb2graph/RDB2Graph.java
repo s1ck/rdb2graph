@@ -1,6 +1,7 @@
 package org.graphbi.rdb2graph;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -14,8 +15,10 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;
+import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraph;
 import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphAnalyzer;
 import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphExtractor;
+import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphMover;
 import org.graphbi.rdb2graph.transformation.Transformer;
 import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.DataSinkInfo;
@@ -149,7 +152,12 @@ public class RDB2Graph {
 		OperationGraphAnalyzer opGraphAnalyzer = new OperationGraphAnalyzer(
 			rDatabaseSchema, gdbs);
 		// extract and analyze the results
-		opGraphAnalyzer.analyze(opGraphExtractor.extract());
+		List<OperationGraph> opGraphs = opGraphExtractor.extract();
+		opGraphAnalyzer.analyze(opGraphs);
+		// move them into the dedicated graph store
+		ReadWriteGraph targetGraphDB = ReadWriteGraphFactory
+			.getInstance(cfg.getOpGraphStore());
+		new OperationGraphMover(gdbs, targetGraphDB).move(opGraphs);
 	    }
 	}
     }

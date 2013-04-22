@@ -17,6 +17,10 @@ public class ReadOnlyGraphFactory {
      * @return
      */
     public static ReadOnlyGraph getInstance(DataSinkInfo dataSinkInfo) {
+	if (dataSinkInfo == null) {
+	    throw new IllegalArgumentException(
+		    "No datasink information defined.");
+	}
 	if ("neo4j".equals(dataSinkInfo.getType())) {
 	    GraphDatabaseService graphdb = new GraphDatabaseFactory()
 		    .newEmbeddedDatabase(dataSinkInfo.getPath());
