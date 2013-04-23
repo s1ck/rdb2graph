@@ -58,7 +58,7 @@ public class GraphBITest {
     }
 
     protected static enum RelTypes implements RelationshipType {
-	basedOn, bills, causedBy, sentBy, createdBy, hasSupervisor, processedBy, postedOn
+	basedOn, bills, causedBy, sentBy, createdBy, hasSupervisor, processedBy, postedOn, INSTANCE
     }
 
     protected GraphDatabaseService graphDb;
