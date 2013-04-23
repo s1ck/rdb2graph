@@ -11,27 +11,27 @@ import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
 import org.graphbi.rdb2graph.util.graph.ReadWriteGraph;
 
 /**
- * Moves extracted operation graphs into a dedicated graph database for better
+ * Copies extracted operation graphs into a dedicated graph database for better
  * analysis.
  * 
  * @author Martin Junghanns
  * 
  */
-public class OperationGraphMover {
+public class OperationGraphDuplicator {
     private static final Logger log = Logger
-	    .getLogger(OperationGraphMover.class);
+	    .getLogger(OperationGraphDuplicator.class);
 
     private final ReadOnlyGraph fromGraphDB;
     private final ReadWriteGraph toGraphDB;
 
-    public OperationGraphMover(ReadOnlyGraph fromGraphDB,
+    public OperationGraphDuplicator(ReadOnlyGraph fromGraphDB,
 	    ReadWriteGraph toGraphDB) {
 	this.fromGraphDB = fromGraphDB;
 	this.toGraphDB = toGraphDB;
     }
 
-    public void move(List<OperationGraph> opGraphs) {
-	log.info(String.format("Moving %d operation graphs", opGraphs.size()));
+    public void duplicate(List<OperationGraph> opGraphs) {
+	log.info(String.format("Copying %d operation graphs", opGraphs.size()));
 	StopWatch sw = new StopWatch();
 	sw.start();
 
@@ -74,5 +74,4 @@ public class OperationGraphMover {
 	sw.stop();
 	log.info(String.format("Done. Took %s", sw));
     }
-
 }

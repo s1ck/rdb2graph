@@ -10,7 +10,7 @@ import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphExtractor;
 import org.graphbi.rdb2graph.util.graph.impl.Neo4jGraph;
 import org.junit.Test;
 
-public class OperationGraphAnalysisTest extends GraphBITest {
+public class OperationGraphExtractorTest extends GraphBITest {
 
     @Test
     public void testOperationGraphExtractionOpGraphCount() {
@@ -59,6 +59,8 @@ public class OperationGraphAnalysisTest extends GraphBITest {
 			nodes.contains(nodeIdMap.get(KEY_REVENUE)));
 	    } else {
 		// Sales OpGraph2
+		Assert.assertEquals(11, nodes.size());
+		Assert.assertEquals(13, edges.size());
 		// documents
 		Assert.assertEquals(true,
 			nodes.contains(nodeIdMap.get(KEY_Q002)));

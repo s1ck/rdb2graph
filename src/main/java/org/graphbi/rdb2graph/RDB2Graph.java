@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraph;
 import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphAnalyzer;
 import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphExtractor;
-import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphMover;
+import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphDuplicator;
 import org.graphbi.rdb2graph.transformation.Transformer;
 import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.DataSinkInfo;
@@ -154,10 +154,10 @@ public class RDB2Graph {
 		// extract and analyze the results
 		List<OperationGraph> opGraphs = opGraphExtractor.extract();
 		opGraphAnalyzer.analyze(opGraphs);
-		// move them into the dedicated graph store
+		// copy them into the dedicated graph store
 		ReadWriteGraph targetGraphDB = ReadWriteGraphFactory
 			.getInstance(cfg.getOpGraphStore());
-		new OperationGraphMover(gdbs, targetGraphDB).move(opGraphs);
+		new OperationGraphDuplicator(gdbs, targetGraphDB).duplicate(opGraphs);
 	    }
 	}
     }
