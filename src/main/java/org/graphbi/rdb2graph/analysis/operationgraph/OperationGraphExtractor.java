@@ -120,7 +120,7 @@ public class OperationGraphExtractor {
 		    nextCandidates = graphDB.getIncidentNodes(edgeId);
 		    // assuming that there are only two nodes connected to that
 		    // edge
-		    nextCandidate = (nextCandidates[0] == discoveryNode) ? nextCandidates[1]
+		    nextCandidate = (nextCandidates[0].equals(discoveryNode)) ? nextCandidates[1]
 			    : nextCandidates[0];
 		    if (!opGraph.getNodes().contains(nextCandidate)) {
 			opGraph.addNode(nextCandidate);
