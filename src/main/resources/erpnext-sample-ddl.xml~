@@ -3703,7 +3703,7 @@
 	</table>
 
 	<table description='R' R2G:ignore='false'
-		name='tabPurchase Taxes and Charges Master' R2G:nodeClass='SupplierTaxesandChargesMaster'>
+		name='tabPurchase Taxes and Charges Master' R2G:nodeClass='PurchaseTaxesandChargesMaster'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -3745,7 +3745,7 @@
 	</table>
 
 	<table description='R' R2G:ignore='false'
-		name='tabSales Taxes and Charges Master' R2G:R2G:nodeClass='CustomerTaxesandChargesMaster'>
+		name='tabSales Taxes and Charges Master' R2G:nodeClass='SalesTaxesandChargesMaster'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -3933,7 +3933,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabOpportunity'
-		R2G:nodeClass='CustomerOpportunity'>
+		R2G:nodeClass='SalesOpportunity'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -4067,7 +4067,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabOpportunity Item'
-		R2G:nodeClass='CustomerOpportunityItem'>
+		R2G:nodeClass='SalesOpportunityItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -4120,7 +4120,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabQuotation'
-		R2G:nodeClass='CustomerQuotation'>
+		R2G:nodeClass='SalesQuotation'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -4319,7 +4319,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabQuotation Item'
-		R2G:nodeClass='CustomerQuotationItem'>
+		R2G:nodeClass='SalesQuotationItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -4402,7 +4402,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabSales Order'
-		R2G:nodeClass='CustomerOrder'>
+		R2G:nodeClass='SalesOrder'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -4622,7 +4622,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabSales Order Item'
-		R2G:nodeClass='CustomerOrderItem'>
+		R2G:nodeClass='SalesOrderItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -4865,7 +4865,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false'
-		name='tabSales and Purchase Return Item' R2G:nodeClass='ReturnItem'>
+		name='tabSales and Purchase Return Item' R2G:nodeClass='SalesandPurchaseReturnItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -4924,7 +4924,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabDelivery Note'
-		R2G:nodeClass='CustomerDeliveryNote'>
+		R2G:nodeClass='SalesDeliveryNote'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -5147,7 +5147,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabDelivery Note Item'
-		R2G:nodeClass='CustomerDeliveryNoteItem'>
+		R2G:nodeClass='SalesDeliveryNoteItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -5267,7 +5267,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabDelivery Note Packing Item'
-		R2G:nodeClass='CustomerDeliveryNotePackingItem'>
+		R2G:nodeClass='SalesDeliveryNotePackingItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -5364,7 +5364,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabPacking Slip'
-		R2G:nodeClass='CustomerPackingSlip'>
+		R2G:nodeClass='SalesPackingSlip'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -5421,7 +5421,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabPacking Slip Item'
-		R2G:nodeClass='CustomerPackingSlipItem'>
+		R2G:nodeClass='SalesPackingSlipItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -5846,7 +5846,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabSales Invoice'
-		R2G:nodeClass='CustomerInvoice'>
+		R2G:nodeClass='SalesInvoice'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -6097,7 +6097,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabSales Invoice Item'
-		R2G:nodeClass='CustomerInvoiceItem'>
+		R2G:nodeClass='SalesInvoiceItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -6229,7 +6229,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabSales Taxes and Charges'
-		R2G:nodeClass='CustomerTaxesandCharges'>
+		R2G:nodeClass='SalesTaxesandCharges'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -6365,7 +6365,7 @@
 	<!--Documents / Purchase -->
 
 	<table description='D' R2G:ignore='false' name='tabMaterial Request'
-		R2G:nodeClass='SupplierRequest'>
+		R2G:nodeClass='PurchaseRequest'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -6447,7 +6447,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabMaterial Request Item'
-		R2G:nodeClass='SupplierRequestItem'>
+		R2G:nodeClass='PurchaseRequestItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -6524,7 +6524,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabSupplier Quotation'
-		R2G:nodeClass='SupplierQuotation'>
+		R2G:nodeClass='PurchaseQuotation'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -6664,7 +6664,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabSupplier Quotation Item'
-		R2G:nodeClass='SupplierQuotationItem'>
+		R2G:nodeClass='PurchaseQuotationItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -6760,7 +6760,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabPurchase Order'
-		R2G:nodeClass='SupplierOrder'>
+		R2G:nodeClass='PurchaseOrder'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -6943,7 +6943,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabPurchase Order Item'
-		R2G:nodeClass='SupplierOrderItem'>
+		R2G:nodeClass='PurchaseOrderItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -7062,7 +7062,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabPurchase Receipt'
-		R2G:nodeClass='SupplierDeliveryNote'>
+		R2G:nodeClass='PurchaseDeliveryNote'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -7250,7 +7250,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabPurchase Receipt Item'
-		R2G:nodeClass='SupplierDeliveryNoteItem'>
+		R2G:nodeClass='PurchaseDeliveryNoteItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -7393,7 +7393,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false'
-		name='tabPurchase Receipt Item Supplied' R2G:nodeClass='SupplierDeliveryNoteItemSupplied'>
+		name='tabPurchase Receipt Item Supplied' R2G:nodeClass='PurchaseDeliveryNoteItemSupplied'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -7465,7 +7465,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabPurchase Invoice'
-		R2G:nodeClass='SupplierInvoice'>
+		R2G:nodeClass='PurchaseInvoice'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -7659,7 +7659,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabPurchase Invoice Advance'
-		R2G:nodeClass='SupplierInvoiceAdvance'>
+		R2G:nodeClass='PurchaseInvoiceAdvance'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -7708,7 +7708,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabPurchase Invoice Item'
-		R2G:nodeClass='SupplierInvoiceItem'>
+		R2G:nodeClass='PurchaseInvoiceItem'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
@@ -7826,7 +7826,7 @@
 	</table>
 
 	<table description='D' R2G:ignore='false' name='tabPurchase Taxes and Charges'
-		R2G:nodeClass='SupplierTaxesandCharges'>
+		R2G:nodeClass='PurchaseTaxesandCharges'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
