@@ -13,4 +13,17 @@ public class Constants {
      * Key to track the source (e.g. the relational database) of a node / edge.
      */
     public static final String SOURCE_KEY = "__source__";
+    /**
+     * Key for the node's corresponding opgraph's position in the sorted.
+     * collection of all opgraphs.
+     */
+    public static final String OPGRAPH_SORT_INDEX = "__opgraph_sortidx__";
+    /**
+     * Key for the nodes' corresponding opgraph's node count.
+     */
+    public static final String OPGRAPH_NODE_COUNT = "__opgraph_nodecnt__";
+    /**
+     * Key for the nodes' corresponding opgraph's edge count.
+     */
+    public static final String OPGRAPH_EDGE_COUNT = "__opgraph_edgecnt__";
 }

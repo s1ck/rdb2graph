@@ -3745,7 +3745,7 @@
 	</table>
 
 	<table description='R' R2G:ignore='false'
-		name='tabSales Taxes and Charges Master' R2G:R2G:nodeClass='CustomerTaxesandChargesMaster'>
+		name='tabSales Taxes and Charges Master' R2G:nodeClass='CustomerTaxesandChargesMaster'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'

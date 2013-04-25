@@ -1,5 +1,7 @@
 package org.graphbi.rdb2graph.analysis.operationgraph;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,12 +45,32 @@ public class OperationGraphDuplicator {
 	String fromNode = null;
 	String toNode = null;
 
+	// sort opgraphs to store index position at nodes
+	// ascending
+	// Collections.sort(opGraphs);
+	// descending
+	Collections.sort(opGraphs, new Comparator<OperationGraph>() {
+	    @Override
+	    public int compare(OperationGraph o1, OperationGraph o2) {
+		return o1.compareTo(o2) * -1;
+	    }
+	});
+
+	int opGraph_idx = 0;
+
 	for (OperationGraph opGraph : opGraphs) {
 	    nodeIdx.clear();
 	    toGraphDB.beginTransaction();
 	    for (Long nodeId : opGraph.getNodes()) {
 		// read properties from source system
 		properties = fromGraphDB.getNodeProperties(nodeId);
+		// add meta data about the opgraph
+		properties.put(Constants.OPGRAPH_SORT_INDEX, opGraph_idx);
+		properties.put(Constants.OPGRAPH_NODE_COUNT,
+			opGraph.getNodeCount());
+		properties.put(Constants.OPGRAPH_EDGE_COUNT,
+			opGraph.getEdgeCount());
+
 		// and write them to target system
 		newNodeId = toGraphDB.createNode(properties, true);
 		nodeIdx.put((String) properties.get(Constants.ID_KEY),
@@ -69,8 +91,8 @@ public class OperationGraphDuplicator {
 	    }
 	    toGraphDB.successTransaction();
 	    toGraphDB.finishTransaction();
+	    opGraph_idx++;
 	}
-
 	sw.stop();
 	log.info(String.format("Done. Took %s", sw));
     }
