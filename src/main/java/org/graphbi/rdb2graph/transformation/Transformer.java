@@ -20,6 +20,7 @@ import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.Constants;
+import org.graphbi.rdb2graph.util.config.NodeSuperClass;
 import org.graphbi.rdb2graph.util.graph.ReadWriteGraph;
 
 public class Transformer {
@@ -124,6 +125,7 @@ public class Transformer {
 	sw.start();
 
 	String tableName = getFormattedTableName(table);
+	NodeSuperClass nodeSuperClass = getNodeSuperClassFromTable(table);
 
 	// subtract the pk- and fk-columns from the whole column set
 	List<Column> propertyCols = getPropertyColumns(table);
@@ -159,6 +161,9 @@ public class Transformer {
 	    properties.put(Constants.CLASS_KEY, getTableIdentifier(table));
 	    primaryNodeKey = getPrimaryNodeKeyValue(table, row);
 	    properties.put(Constants.ID_KEY, primaryNodeKey);
+	    if (nodeSuperClass != null) {
+		properties.put(Constants.SUPER_CLASS_KEY, nodeSuperClass);
+	    }
 
 	    // read all non-pk properties (including foreign keys)
 	    for (Column c : propertyCols) {
@@ -456,5 +461,24 @@ public class Transformer {
      */
     private String getForeignKeyIdentifier(ForeignKey fk) {
 	return (fk.getEdgeClass() != null) ? fk.getEdgeClass() : fk.getName();
+    }
+
+    /**
+     * Returns the table's corresponding NodeSuperClass or null if there is no
+     * or an invalid description.
+     * 
+     * @param t
+     *            Table
+     * @return The table's NodeSuperClass or null if there is no or an invalid
+     *         description.
+     */
+    private NodeSuperClass getNodeSuperClassFromTable(Table t) {
+	String tableDesc = t.getDescription();
+	if (tableDesc == null || "".equals(tableDesc)) {
+	    return null;
+	}
+	return ("r".equals(tableDesc.toLowerCase())) ? NodeSuperClass.RESOURCE
+		: ("d".equals(tableDesc.toLowerCase())) ? NodeSuperClass.DOCUMENT
+			: null;
     }
 }

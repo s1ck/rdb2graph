@@ -6,9 +6,13 @@ public class Constants {
      */
     public static final String ID_KEY = "__id__";
     /**
-     * Key for type node and edge types.
+     * Key for node and edge type / class.
      */
     public static final String CLASS_KEY = "__class__";
+    /**
+     * Key for node's superclass (document / resource)
+     */
+    public static final String SUPER_CLASS_KEY = "__superclass__";
     /**
      * Key to track the source (e.g. the relational database) of a node / edge.
      */
