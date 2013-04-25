@@ -3893,7 +3893,7 @@
 
 	<!--Documents / Sales -->
 
-	<table description='D' R2G:ignore='false' name='tabCampaign'
+	<table description='R' R2G:ignore='false' name='tabCampaign'
 		R2G:nodeClass='SalesCampaign'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
@@ -6365,7 +6365,7 @@
 	<!--Documents / Purchase -->
 
 	<table description='D' R2G:ignore='false' name='tabMaterial Request'
-		R2G:nodeClass='SupplierRequest'>
+		R2G:nodeClass='MaterialRequest'>
 		<column R2G:ignore='false' size='120' name='name' primaryKey='true'
 			required='true' type='VARCHAR' autoIncrement='false' />
 		<column R2G:ignore='false' size='19' name='creation'
