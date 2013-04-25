@@ -12,11 +12,15 @@ public class Constants {
     /**
      * Key for node's superclass (document / resource)
      */
-    public static final String SUPER_CLASS_KEY = "__superclass__";
+    public static final String NODE_SUPER_CLASS_KEY = "__superclass__";
     /**
      * Key to track the source (e.g. the relational database) of a node / edge.
      */
     public static final String SOURCE_KEY = "__source__";
+    /**
+     * Key for row's primary key attribute value.
+     */
+    public static final String NODE_PK_KEY = "__pk__";
     /**
      * Key for the node's corresponding opgraph's position in the sorted.
      * collection of all opgraphs.

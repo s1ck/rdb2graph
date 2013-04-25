@@ -162,8 +162,11 @@ public class Transformer {
 	    primaryNodeKey = getPrimaryNodeKeyValue(table, row);
 	    properties.put(Constants.ID_KEY, primaryNodeKey);
 	    if (nodeSuperClass != null) {
-		properties.put(Constants.SUPER_CLASS_KEY, nodeSuperClass);
+		properties.put(Constants.NODE_SUPER_CLASS_KEY, nodeSuperClass);
 	    }
+	    // store the primary key value separately
+	    properties.put(Constants.NODE_PK_KEY, primaryNodeKey.substring(
+		    primaryNodeKey.indexOf('_') + 1, primaryNodeKey.length()));
 
 	    // read all non-pk properties (including foreign keys)
 	    for (Column c : propertyCols) {
