@@ -32,6 +32,8 @@ public class Transformer {
      * origin of the nodes and edges.
      */
 
+    private final Config cfg;
+
     private final Platform platform;
     private final Database relDatabase;
     private final ReadWriteGraph graphDatabase;
@@ -45,14 +47,15 @@ public class Transformer {
     private final boolean useSchema;
     private final boolean useDelimiters;
 
-    public Transformer(Platform platform, Database relDatabase,
+    public Transformer(Config cfg, Platform platform, Database relDatabase,
 	    ReadWriteGraph graphDatabase) {
-	this(platform, relDatabase, graphDatabase, false, false);
+	this(cfg, platform, relDatabase, graphDatabase, false, false);
     }
 
-    public Transformer(Platform platform, Database relDatabase,
+    public Transformer(Config cfg, Platform platform, Database relDatabase,
 	    ReadWriteGraph graphDatabase, boolean useSchema,
 	    boolean useDelimiters) {
+	this.cfg = cfg;
 	this.platform = platform;
 	this.relDatabase = relDatabase;
 	this.graphDatabase = graphDatabase;
@@ -176,7 +179,8 @@ public class Transformer {
 		}
 	    }
 	    // create new node based on the given properties
-	    if ((nodeId = graphDatabase.createNode(properties)) != null) {
+	    if ((nodeId = graphDatabase.createNode(properties, true, cfg
+		    .getGraphStore().useReferenceNode())) != null) {
 		nodeIdx.put(primaryNodeKey, nodeId);
 		rowCnt++;
 		rowsPassed++;

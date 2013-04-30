@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
+import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.Constants;
 import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
 import org.graphbi.rdb2graph.util.graph.ReadWriteGraph;
@@ -23,11 +24,14 @@ public class OperationGraphDuplicator {
     private static final Logger log = Logger
 	    .getLogger(OperationGraphDuplicator.class);
 
+    private final Config cfg;
+
     private final ReadOnlyGraph fromGraphDB;
     private final ReadWriteGraph toGraphDB;
 
-    public OperationGraphDuplicator(ReadOnlyGraph fromGraphDB,
+    public OperationGraphDuplicator(Config cfg, ReadOnlyGraph fromGraphDB,
 	    ReadWriteGraph toGraphDB) {
+	this.cfg = cfg;
 	this.fromGraphDB = fromGraphDB;
 	this.toGraphDB = toGraphDB;
     }
@@ -72,7 +76,8 @@ public class OperationGraphDuplicator {
 			opGraph.getEdgeCount());
 
 		// and write them to target system
-		newNodeId = toGraphDB.createNode(properties, true);
+		newNodeId = toGraphDB.createNode(properties, true, cfg
+			.getOpGraphStore().useReferenceNode());
 		nodeIdx.put((String) properties.get(Constants.ID_KEY),
 			newNodeId);
 	    }

@@ -136,7 +136,7 @@ public class RDB2Graph {
 	    ReadWriteGraph gdbs = ReadWriteGraphFactory
 		    .getInstance(dataSinkInfo);
 	    // and transform relational database into graph
-	    Transformer t = new Transformer(rdbs, rDatabaseSchema, gdbs,
+	    Transformer t = new Transformer(cfg, rdbs, rDatabaseSchema, gdbs,
 		    dataSourceInfo.getUseSchema(),
 		    dataSourceInfo.getUseDelimiter());
 	    t.transform();
@@ -157,7 +157,8 @@ public class RDB2Graph {
 		// copy them into the dedicated graph store
 		ReadWriteGraph targetGraphDB = ReadWriteGraphFactory
 			.getInstance(cfg.getOpGraphStore());
-		new OperationGraphDuplicator(gdbs, targetGraphDB).duplicate(opGraphs);
+		new OperationGraphDuplicator(cfg, gdbs, targetGraphDB)
+			.duplicate(opGraphs);
 	    }
 	}
     }

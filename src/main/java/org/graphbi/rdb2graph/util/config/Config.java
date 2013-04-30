@@ -103,13 +103,15 @@ public class Config {
 	graphStore = new DataSinkInfo(props.getProperty("graphstore.type"),
 		props.getProperty("graphstore.path"),
 		Boolean.parseBoolean(props.getProperty("graphstore.drop",
-			"false")));
+			"false")), Boolean.parseBoolean(props.getProperty(
+			"graphstore.useReferenceNode", "true")));
     }
 
     private void parseOpGraphStore() {
 	opGraphStore = new DataSinkInfo(props.getProperty("opgraphstore.type"),
 		props.getProperty("opgraphstore.path"),
 		Boolean.parseBoolean(props.getProperty("opgraphstore.drop",
-			"false")));
+			"false")), Boolean.parseBoolean(props.getProperty(
+			"graphstore.useReferenceNode", "true")));
     }
 }

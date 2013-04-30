@@ -29,7 +29,7 @@ public class OperationGraphDuplicatorTest extends GraphBITest {
 	List<OperationGraph> opGraphs = new OperationGraphExtractor(fromGraph,
 		nodeClassSuperClassMap).extract();
 
-	OperationGraphDuplicator mover = new OperationGraphDuplicator(
+	OperationGraphDuplicator mover = new OperationGraphDuplicator(cfg,
 		fromGraph, toGraph);
 	mover.duplicate(opGraphs);
 

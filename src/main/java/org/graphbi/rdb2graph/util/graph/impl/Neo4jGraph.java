@@ -97,14 +97,23 @@ public class Neo4jGraph implements ReadWriteGraph {
 
     @Override
     public Long createNode(final Map<String, Object> properties) {
-	return createNode(properties, true);
+	return createNode(properties, true, true);
     }
 
     @Override
     public Long createNode(final Map<String, Object> properties,
 	    boolean useIndex) {
+	return createNode(properties, useIndex, true);
+    }
+
+    @Override
+    public Long createNode(final Map<String, Object> properties,
+	    boolean useIndex, boolean useReferenceNode) {
 	String type = (String) properties.get(Constants.CLASS_KEY);
-	Node refNode = getReferenceNode(type);
+	Node refNode = null;
+	if (useReferenceNode) {
+	    refNode = getReferenceNode(type);
+	}
 	// create node
 	Node node = graphdb.createNode();
 	for (Map.Entry<String, Object> e : properties.entrySet()) {
@@ -115,7 +124,9 @@ public class Neo4jGraph implements ReadWriteGraph {
 	}
 
 	// create edge between refNode and new node
-	refNode.createRelationshipTo(node, RelTypes.INSTANCE);
+	if (refNode != null && useReferenceNode) {
+	    refNode.createRelationshipTo(node, RelTypes.INSTANCE);
+	}
 
 	log.debug(String.format("Created Neo4j node: %s", node));
 	return node.getId();

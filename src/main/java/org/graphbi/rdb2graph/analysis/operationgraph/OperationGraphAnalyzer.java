@@ -1,11 +1,6 @@
 package org.graphbi.rdb2graph.analysis.operationgraph;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-
-import javax.swing.event.ListSelectionEvent;
 
 import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;

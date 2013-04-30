@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.ddlutils.model.Database;
+import org.graphbi.rdb2graph.RDB2Graph;
+import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.Constants;
 import org.graphbi.rdb2graph.util.config.NodeSuperClass;
 import org.junit.After;
@@ -61,11 +63,17 @@ public class GraphBITest {
 	basedOn, bills, causedBy, sentBy, createdBy, hasSupervisor, processedBy, postedOn, INSTANCE
     }
 
+    protected Config cfg;
+
     protected GraphDatabaseService graphDb;
     protected Database relationalDB;
 
     @Before
     public void prepareTestDatabase() {
+	cfg = new Config(RDB2Graph.class.getResource("/config.properties")
+		.getFile());
+	cfg.parse();
+
 	graphDb = new TestGraphDatabaseFactory()
 		.newImpermanentDatabaseBuilder().newGraphDatabase();
 	relationalDB = new Database();
