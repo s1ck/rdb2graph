@@ -22,16 +22,16 @@ public class Constants {
      */
     public static final String NODE_PK_KEY = "__pk__";
     /**
-     * Key for the node's corresponding opgraph's position in the sorted.
+     * Key for the node's corresponding docgraph's position in the sorted.
      * collection of all opgraphs.
      */
-    public static final String OPGRAPH_SORT_INDEX = "__opgraph_sortidx__";
+    public static final String DOCGRAPH_SORT_INDEX = "__docgraph_sortidx__";
     /**
-     * Key for the nodes' corresponding opgraph's node count.
+     * Key for the nodes' corresponding docgraph's node count.
      */
-    public static final String OPGRAPH_NODE_COUNT = "__opgraph_nodecnt__";
+    public static final String DOCGRAPH_NODE_COUNT = "__docgraph_nodecnt__";
     /**
-     * Key for the nodes' corresponding opgraph's edge count.
+     * Key for the nodes' corresponding docgraph's edge count.
      */
-    public static final String OPGRAPH_EDGE_COUNT = "__opgraph_edgecnt__";
+    public static final String DOCGRAPH_EDGE_COUNT = "__docgraph_edgecnt__";
 }

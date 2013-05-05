@@ -1,4 +1,4 @@
-package org.graphbi.rdb2graph.analysis.operationgraph;
+package org.graphbi.rdb2graph.analysis.documentgraph;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,30 +14,30 @@ import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
 import org.graphbi.rdb2graph.util.graph.ReadWriteGraph;
 
 /**
- * Copies extracted operation graphs into a dedicated graph database for better
+ * Copies extracted document graphs into a dedicated graph database for better
  * analysis.
  * 
  * @author Martin Junghanns
  * 
  */
-public class OperationGraphDuplicator {
+public class DocumentGraphDuplicator {
     private static final Logger log = Logger
-	    .getLogger(OperationGraphDuplicator.class);
+	    .getLogger(DocumentGraphDuplicator.class);
 
     private final Config cfg;
 
     private final ReadOnlyGraph fromGraphDB;
     private final ReadWriteGraph toGraphDB;
 
-    public OperationGraphDuplicator(Config cfg, ReadOnlyGraph fromGraphDB,
+    public DocumentGraphDuplicator(Config cfg, ReadOnlyGraph fromGraphDB,
 	    ReadWriteGraph toGraphDB) {
 	this.cfg = cfg;
 	this.fromGraphDB = fromGraphDB;
 	this.toGraphDB = toGraphDB;
     }
 
-    public void duplicate(List<OperationGraph> opGraphs) {
-	log.info(String.format("Copying %d operation graphs", opGraphs.size()));
+    public void duplicate(List<DocumentGraph> opGraphs) {
+	log.info(String.format("Copying %d document graphs", opGraphs.size()));
 	StopWatch sw = new StopWatch();
 	sw.start();
 
@@ -53,26 +53,26 @@ public class OperationGraphDuplicator {
 	// ascending
 	// Collections.sort(opGraphs);
 	// descending
-	Collections.sort(opGraphs, new Comparator<OperationGraph>() {
+	Collections.sort(opGraphs, new Comparator<DocumentGraph>() {
 	    @Override
-	    public int compare(OperationGraph o1, OperationGraph o2) {
+	    public int compare(DocumentGraph o1, DocumentGraph o2) {
 		return o1.compareTo(o2) * -1;
 	    }
 	});
 
 	int opGraph_idx = 0;
 
-	for (OperationGraph opGraph : opGraphs) {
+	for (DocumentGraph opGraph : opGraphs) {
 	    nodeIdx.clear();
 	    toGraphDB.beginTransaction();
 	    for (Long nodeId : opGraph.getNodes()) {
 		// read properties from source system
 		properties = fromGraphDB.getNodeProperties(nodeId);
 		// add meta data about the opgraph
-		properties.put(Constants.OPGRAPH_SORT_INDEX, opGraph_idx);
-		properties.put(Constants.OPGRAPH_NODE_COUNT,
+		properties.put(Constants.DOCGRAPH_SORT_INDEX, opGraph_idx);
+		properties.put(Constants.DOCGRAPH_NODE_COUNT,
 			opGraph.getNodeCount());
-		properties.put(Constants.OPGRAPH_EDGE_COUNT,
+		properties.put(Constants.DOCGRAPH_EDGE_COUNT,
 			opGraph.getEdgeCount());
 
 		// and write them to target system

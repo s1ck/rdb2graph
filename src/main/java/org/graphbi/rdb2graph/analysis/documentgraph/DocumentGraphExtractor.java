@@ -1,4 +1,4 @@
-package org.graphbi.rdb2graph.analysis.operationgraph;
+package org.graphbi.rdb2graph.analysis.documentgraph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,13 +16,13 @@ import org.graphbi.rdb2graph.util.config.NodeSuperClass;
 import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
 
 /**
- * Extracts and analyzes case graphs inside a given graph.
+ * Extracts and analyzes document graphs inside a given graph.
  * 
  * @author s1ck
  * 
  */
-public class OperationGraphExtractor {
-    private static Logger log = Logger.getLogger(OperationGraphExtractor.class);
+public class DocumentGraphExtractor {
+    private static Logger log = Logger.getLogger(DocumentGraphExtractor.class);
 
     private final ReadOnlyGraph graphDB;
     private final Database relationalDB;
@@ -32,7 +32,7 @@ public class OperationGraphExtractor {
      */
     private final Map<String, NodeSuperClass> nodeClassSuperClassMap;
 
-    public OperationGraphExtractor(ReadOnlyGraph graphWrapper,
+    public DocumentGraphExtractor(ReadOnlyGraph graphWrapper,
 	    Map<String, NodeSuperClass> nodeClassSuperClassMap) {
 	if (graphWrapper == null) {
 	    throw new IllegalArgumentException("graphWrapper must not be null.");
@@ -42,7 +42,7 @@ public class OperationGraphExtractor {
 	this.nodeClassSuperClassMap = nodeClassSuperClassMap;
     }
 
-    public OperationGraphExtractor(ReadOnlyGraph graphWrapper,
+    public DocumentGraphExtractor(ReadOnlyGraph graphWrapper,
 	    Database relationalDB) {
 	if (relationalDB == null) {
 	    throw new IllegalArgumentException(
@@ -72,13 +72,13 @@ public class OperationGraphExtractor {
 	return nodeClassSuperClassMap;
     }
 
-    public List<OperationGraph> extract() {
-	log.info("Extracting operation graphs.");
+    public List<DocumentGraph> extract() {
+	log.info("Extracting document graphs.");
 	StopWatch sw = new StopWatch();
 	sw.start();
 
-	// Operation graphs
-	List<OperationGraph> opGraphs = new ArrayList<OperationGraph>();
+	// Document graphs
+	List<DocumentGraph> docGraphs = new ArrayList<DocumentGraph>();
 	// candidate set of documents
 	Set<Long> candidates = graphDB.getNodesBySuperClass(
 		nodeClassSuperClassMap, NodeSuperClass.DOCUMENT);
@@ -94,7 +94,7 @@ public class OperationGraphExtractor {
 	// v_c
 	Long discoveryNode = null;
 	// G_o
-	OperationGraph opGraph = null;
+	DocumentGraph docGraph = null;
 	// E_c
 	Set<Long> incidentEdges = null;
 	// Array of v_n candidates
@@ -103,10 +103,10 @@ public class OperationGraphExtractor {
 	Long nextCandidate = null;
 
 	while ((discoveryStartNode = globalCandidatesQueue.peek()) != null) {
-	    // create new operation graph
-	    opGraph = new OperationGraph();
+	    // create new document graph
+	    docGraph = new DocumentGraph();
 	    // and start with a unexplored node
-	    opGraph.addNode(discoveryStartNode);
+	    docGraph.addNode(discoveryStartNode);
 	    operationCandidatesQueue = new LinkedList<Long>();
 	    operationCandidatesQueue.add(discoveryStartNode);
 	    while ((discoveryNode = operationCandidatesQueue.peek()) != null) {
@@ -114,16 +114,16 @@ public class OperationGraphExtractor {
 		operationCandidatesQueue.remove(discoveryNode);
 		// get incident edges of discovery node
 		incidentEdges = graphDB.getIncidentEdges(discoveryNode);
-		// remove all edges already stored in the operation graph
-		incidentEdges.removeAll(opGraph.getEdges());
+		// remove all edges already stored in the document graph
+		incidentEdges.removeAll(docGraph.getEdges());
 		for (Long edgeId : incidentEdges) {
 		    nextCandidates = graphDB.getIncidentNodes(edgeId);
 		    // assuming that there are only two nodes connected to that
 		    // edge
 		    nextCandidate = (nextCandidates[0].equals(discoveryNode)) ? nextCandidates[1]
 			    : nextCandidates[0];
-		    if (!opGraph.getNodes().contains(nextCandidate)) {
-			opGraph.addNode(nextCandidate);
+		    if (!docGraph.getNodes().contains(nextCandidate)) {
+			docGraph.addNode(nextCandidate);
 			String nodeClass = graphDB.getNodeClass(nextCandidate);
 			if (nodeClass != null
 				&& nodeClassSuperClassMap
@@ -133,14 +133,14 @@ public class OperationGraphExtractor {
 			    operationCandidatesQueue.add(nextCandidate);
 			}
 		    }
-		    opGraph.addEdge(edgeId);
+		    docGraph.addEdge(edgeId);
 		}
 	    }
-	    opGraphs.add(opGraph);
+	    docGraphs.add(docGraph);
 	}
 	sw.stop();
-	log.info(String.format("Done. Found %d operation graphs. Took %s",
-		opGraphs.size(), sw));
-	return opGraphs;
+	log.info(String.format("Done. Found %d document graphs. Took %s",
+		docGraphs.size(), sw));
+	return docGraphs;
     }
 }

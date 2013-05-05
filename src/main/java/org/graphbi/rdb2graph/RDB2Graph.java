@@ -15,10 +15,10 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraph;
-import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphAnalyzer;
-import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphExtractor;
-import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphDuplicator;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraph;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraphAnalyzer;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraphDuplicator;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraphExtractor;
 import org.graphbi.rdb2graph.transformation.Transformer;
 import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.DataSinkInfo;
@@ -147,17 +147,17 @@ public class RDB2Graph {
 	    ReadOnlyGraph gdbs = ReadOnlyGraphFactory.getInstance(dataSinkInfo);
 	    String arg = cmd.getOptionValue(ANALYZE_OPTION).toLowerCase();
 	    if ("opgraph".equals(arg)) {
-		OperationGraphExtractor opGraphExtractor = new OperationGraphExtractor(
+		DocumentGraphExtractor opGraphExtractor = new DocumentGraphExtractor(
 			gdbs, rDatabaseSchema);
-		OperationGraphAnalyzer opGraphAnalyzer = new OperationGraphAnalyzer(
+		DocumentGraphAnalyzer opGraphAnalyzer = new DocumentGraphAnalyzer(
 			rDatabaseSchema, gdbs);
 		// extract and analyze the results
-		List<OperationGraph> opGraphs = opGraphExtractor.extract();
+		List<DocumentGraph> opGraphs = opGraphExtractor.extract();
 		opGraphAnalyzer.analyze(opGraphs);
 		// copy them into the dedicated graph store
 		ReadWriteGraph targetGraphDB = ReadWriteGraphFactory
 			.getInstance(cfg.getOpGraphStore());
-		new OperationGraphDuplicator(cfg, gdbs, targetGraphDB)
+		new DocumentGraphDuplicator(cfg, gdbs, targetGraphDB)
 			.duplicate(opGraphs);
 	    }
 	}

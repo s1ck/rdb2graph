@@ -4,9 +4,9 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraph;
-import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphExtractor;
-import org.graphbi.rdb2graph.analysis.operationgraph.OperationGraphDuplicator;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraph;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraphDuplicator;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraphExtractor;
 import org.graphbi.rdb2graph.util.graph.impl.Neo4jGraph;
 import org.junit.Test;
 import org.neo4j.graphdb.Direction;
@@ -26,10 +26,10 @@ public class OperationGraphDuplicatorTest extends GraphBITest {
 		.newImpermanentDatabaseBuilder().newGraphDatabase();
 	Neo4jGraph toGraph = new Neo4jGraph(toGraphDB);
 
-	List<OperationGraph> opGraphs = new OperationGraphExtractor(fromGraph,
+	List<DocumentGraph> opGraphs = new DocumentGraphExtractor(fromGraph,
 		nodeClassSuperClassMap).extract();
 
-	OperationGraphDuplicator mover = new OperationGraphDuplicator(cfg,
+	DocumentGraphDuplicator mover = new DocumentGraphDuplicator(cfg,
 		fromGraph, toGraph);
 	mover.duplicate(opGraphs);
 
