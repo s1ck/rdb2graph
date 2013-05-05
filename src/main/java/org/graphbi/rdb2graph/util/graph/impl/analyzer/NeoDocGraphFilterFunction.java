@@ -11,7 +11,8 @@ public abstract class NeoDocGraphFilterFunction implements DocGraphFilterFunctio
     
     public NeoDocGraphFilterFunction(ReadOnlyGraph graph) {
 	if (!(graph instanceof Neo4jGraph)) {
-	    throw new IllegalArgumentException();
+	    throw new IllegalArgumentException(
+		    "graph must be instance of Neo4jGraph");
 	}
 	this.graph = ((Neo4jGraph)graph).getGraphDB();
     }

@@ -29,8 +29,8 @@ public class DocGraphDuplicatorTest extends GraphBITest {
 	List<DocGraph> opGraphs = new DocGraphExtractor(fromGraph,
 		nodeClassSuperClassMap).extract();
 
-	DocGraphDuplicator mover = new DocGraphDuplicator(cfg,
-		fromGraph, toGraph);
+	DocGraphDuplicator mover = new DocGraphDuplicator(cfg, fromGraph,
+		toGraph);
 	mover.duplicate(opGraphs);
 
 	// get node and edge count of the new graph

@@ -5,13 +5,15 @@ import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
 import org.graphbi.rdb2graph.util.graph.impl.Neo4jGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-public abstract class NeoDocGraphMeasureFunction<T> implements DocGraphMeasureFunction<T> {
+public abstract class NeoDocGraphMeasureFunction<T> implements
+	DocGraphMeasureFunction<T> {
 
     protected final GraphDatabaseService graph;
 
     public NeoDocGraphMeasureFunction(ReadOnlyGraph graph) {
 	if (!(graph instanceof Neo4jGraph)) {
-	    throw new IllegalArgumentException();
+	    throw new IllegalArgumentException(
+		    "graph must be instance of Neo4jGraph");
 	}
 	this.graph = ((Neo4jGraph) graph).getGraphDB();
     }
