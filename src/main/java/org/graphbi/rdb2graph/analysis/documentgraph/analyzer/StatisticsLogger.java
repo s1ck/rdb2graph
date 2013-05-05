@@ -1,28 +1,21 @@
-package org.graphbi.rdb2graph.analysis.documentgraph;
+package org.graphbi.rdb2graph.analysis.documentgraph.analyzer;
 
 import java.util.List;
 
-import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocGraph;
 
-public class DocumentGraphAnalyzer {
+public class StatisticsLogger {
 
-    private static Logger log = Logger.getLogger(DocumentGraphAnalyzer.class);
+    private static Logger log = Logger.getLogger(StatisticsLogger.class);
 
-    @SuppressWarnings("unused")
-    private final Database relationalDB;
-    @SuppressWarnings("unused")
-    private final ReadOnlyGraph graphDB;
-
-    public DocumentGraphAnalyzer(Database relationalDB, ReadOnlyGraph graphDB) {
-	this.relationalDB = relationalDB;
-	this.graphDB = graphDB;
+    public void analyze(List<DocGraph> docGraphs) {
+	analyze(docGraphs, null);
     }
 
-    public void analyze(List<DocumentGraph> opGraphs) {
-	log.info(String.format("Analyzing %d document graphs", opGraphs.size()));
-	int n = opGraphs.size();
+    public void analyze(List<DocGraph> docGraphs, DocGraphFilterFunction filter) {
+	log.info(String.format("Analyzing %d document graphs", docGraphs.size()));
+	int n = docGraphs.size();
 	int localNodeCount = 0;
 	int localEdgeCount = 0;
 	int maxNodeCount = 0;
@@ -33,10 +26,13 @@ public class DocumentGraphAnalyzer {
 	int edgeSum = 0;
 	float avgNodeCount = 0f;
 	float avgEdgeCount = 0f;
-	
-	for (DocumentGraph opGraph : opGraphs) {
-	    localNodeCount = opGraph.getNodes().size();
-	    localEdgeCount = opGraph.getEdges().size();
+
+	for (DocGraph docGraph : docGraphs) {
+	    if (filter != null && !filter.filter(docGraph)) {
+		continue;
+	    }
+	    localNodeCount = docGraph.getNodes().size();
+	    localEdgeCount = docGraph.getEdges().size();
 	    if (localNodeCount > maxNodeCount) {
 		maxNodeCount = localNodeCount;
 	    }

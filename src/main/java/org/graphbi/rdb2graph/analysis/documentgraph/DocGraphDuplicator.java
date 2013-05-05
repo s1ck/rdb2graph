@@ -20,24 +20,24 @@ import org.graphbi.rdb2graph.util.graph.ReadWriteGraph;
  * @author Martin Junghanns
  * 
  */
-public class DocumentGraphDuplicator {
+public class DocGraphDuplicator {
     private static final Logger log = Logger
-	    .getLogger(DocumentGraphDuplicator.class);
+	    .getLogger(DocGraphDuplicator.class);
 
     private final Config cfg;
 
     private final ReadOnlyGraph fromGraphDB;
     private final ReadWriteGraph toGraphDB;
 
-    public DocumentGraphDuplicator(Config cfg, ReadOnlyGraph fromGraphDB,
+    public DocGraphDuplicator(Config cfg, ReadOnlyGraph fromGraphDB,
 	    ReadWriteGraph toGraphDB) {
 	this.cfg = cfg;
 	this.fromGraphDB = fromGraphDB;
 	this.toGraphDB = toGraphDB;
     }
 
-    public void duplicate(List<DocumentGraph> opGraphs) {
-	log.info(String.format("Copying %d document graphs", opGraphs.size()));
+    public void duplicate(List<DocGraph> docGraphs) {
+	log.info(String.format("Copying %d document graphs", docGraphs.size()));
 	StopWatch sw = new StopWatch();
 	sw.start();
 
@@ -53,27 +53,28 @@ public class DocumentGraphDuplicator {
 	// ascending
 	// Collections.sort(opGraphs);
 	// descending
-	Collections.sort(opGraphs, new Comparator<DocumentGraph>() {
+	Collections.sort(docGraphs, new Comparator<DocGraph>() {
 	    @Override
-	    public int compare(DocumentGraph o1, DocumentGraph o2) {
+	    public int compare(DocGraph o1, DocGraph o2) {
 		return o1.compareTo(o2) * -1;
 	    }
 	});
 
 	int opGraph_idx = 0;
 
-	for (DocumentGraph opGraph : opGraphs) {
+	for (DocGraph docGraph : docGraphs) {
 	    nodeIdx.clear();
 	    toGraphDB.beginTransaction();
-	    for (Long nodeId : opGraph.getNodes()) {
+	    for (Long nodeId : docGraph.getNodes()) {
 		// read properties from source system
 		properties = fromGraphDB.getNodeProperties(nodeId);
 		// add meta data about the opgraph
+		properties.put(Constants.DOCGRAPH_ID, docGraph.getId());
 		properties.put(Constants.DOCGRAPH_SORT_INDEX, opGraph_idx);
 		properties.put(Constants.DOCGRAPH_NODE_COUNT,
-			opGraph.getNodeCount());
+			docGraph.getNodeCount());
 		properties.put(Constants.DOCGRAPH_EDGE_COUNT,
-			opGraph.getEdgeCount());
+			docGraph.getEdgeCount());
 
 		// and write them to target system
 		newNodeId = toGraphDB.createNode(properties, true, cfg
@@ -81,7 +82,7 @@ public class DocumentGraphDuplicator {
 		nodeIdx.put((String) properties.get(Constants.ID_KEY),
 			newNodeId);
 	    }
-	    for (Long edgeId : opGraph.getEdges()) {
+	    for (Long edgeId : docGraph.getEdges()) {
 		// read properties and type from source system
 		properties = fromGraphDB.getEdgeProperties(edgeId);
 		edgeType = fromGraphDB.getEdgeType(edgeId);

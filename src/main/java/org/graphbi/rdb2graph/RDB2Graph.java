@@ -15,10 +15,12 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraph;
-import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraphAnalyzer;
-import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraphDuplicator;
-import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraphExtractor;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocGraph;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocGraphExtractor;
+import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.AnalyzerResult;
+import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.DocGraphMeasureFunction;
+import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.NumericalAggregation;
+import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.StatisticsLogger;
 import org.graphbi.rdb2graph.transformation.Transformer;
 import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.DataSinkInfo;
@@ -147,18 +149,32 @@ public class RDB2Graph {
 	    ReadOnlyGraph gdbs = ReadOnlyGraphFactory.getInstance(dataSinkInfo);
 	    String arg = cmd.getOptionValue(ANALYZE_OPTION).toLowerCase();
 	    if ("opgraph".equals(arg)) {
-		DocumentGraphExtractor opGraphExtractor = new DocumentGraphExtractor(
+		DocGraphExtractor opGraphExtractor = new DocGraphExtractor(
 			gdbs, rDatabaseSchema);
-		DocumentGraphAnalyzer opGraphAnalyzer = new DocumentGraphAnalyzer(
-			rDatabaseSchema, gdbs);
 		// extract and analyze the results
-		List<DocumentGraph> opGraphs = opGraphExtractor.extract();
-		opGraphAnalyzer.analyze(opGraphs);
+		List<DocGraph> docGraphs = opGraphExtractor.extract();
+		new StatisticsLogger().analyze(docGraphs);
+
+		List<AnalyzerResult<Integer>> res = new NumericalAggregation()
+			.analyze(docGraphs,
+				new DocGraphMeasureFunction<Integer>() {
+
+				    @Override
+				    public Integer measure(DocGraph docGraph) {
+					return docGraph.getNodeCount()
+						+ docGraph.getEdgeCount();
+				    }
+				});
+		
+		for (AnalyzerResult<Integer> r : res) {
+		    log.info(r.getDocGraph().getId() + " -> " + r.getResult());
+		}
+
 		// copy them into the dedicated graph store
 		ReadWriteGraph targetGraphDB = ReadWriteGraphFactory
 			.getInstance(cfg.getOpGraphStore());
-		new DocumentGraphDuplicator(cfg, gdbs, targetGraphDB)
-			.duplicate(opGraphs);
+		// new DocGraphDuplicator(cfg, gdbs, targetGraphDB)
+		// .duplicate(docGraphs);
 	    }
 	}
     }

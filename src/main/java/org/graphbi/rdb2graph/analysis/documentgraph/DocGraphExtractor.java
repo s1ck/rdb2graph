@@ -21,8 +21,8 @@ import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
  * @author s1ck
  * 
  */
-public class DocumentGraphExtractor {
-    private static Logger log = Logger.getLogger(DocumentGraphExtractor.class);
+public class DocGraphExtractor {
+    private static Logger log = Logger.getLogger(DocGraphExtractor.class);
 
     private final ReadOnlyGraph graphDB;
     private final Database relationalDB;
@@ -32,7 +32,7 @@ public class DocumentGraphExtractor {
      */
     private final Map<String, NodeSuperClass> nodeClassSuperClassMap;
 
-    public DocumentGraphExtractor(ReadOnlyGraph graphWrapper,
+    public DocGraphExtractor(ReadOnlyGraph graphWrapper,
 	    Map<String, NodeSuperClass> nodeClassSuperClassMap) {
 	if (graphWrapper == null) {
 	    throw new IllegalArgumentException("graphWrapper must not be null.");
@@ -42,7 +42,7 @@ public class DocumentGraphExtractor {
 	this.nodeClassSuperClassMap = nodeClassSuperClassMap;
     }
 
-    public DocumentGraphExtractor(ReadOnlyGraph graphWrapper,
+    public DocGraphExtractor(ReadOnlyGraph graphWrapper,
 	    Database relationalDB) {
 	if (relationalDB == null) {
 	    throw new IllegalArgumentException(
@@ -72,13 +72,13 @@ public class DocumentGraphExtractor {
 	return nodeClassSuperClassMap;
     }
 
-    public List<DocumentGraph> extract() {
+    public List<DocGraph> extract() {
 	log.info("Extracting document graphs.");
 	StopWatch sw = new StopWatch();
 	sw.start();
 
 	// Document graphs
-	List<DocumentGraph> docGraphs = new ArrayList<DocumentGraph>();
+	List<DocGraph> docGraphs = new ArrayList<DocGraph>();
 	// candidate set of documents
 	Set<Long> candidates = graphDB.getNodesBySuperClass(
 		nodeClassSuperClassMap, NodeSuperClass.DOCUMENT);
@@ -94,17 +94,19 @@ public class DocumentGraphExtractor {
 	// v_c
 	Long discoveryNode = null;
 	// G_o
-	DocumentGraph docGraph = null;
+	DocGraph docGraph = null;
 	// E_c
 	Set<Long> incidentEdges = null;
 	// Array of v_n candidates
 	Long[] nextCandidates = null;
 	// v_n
 	Long nextCandidate = null;
+	
+	Long docGraphId = 0L;
 
 	while ((discoveryStartNode = globalCandidatesQueue.peek()) != null) {
 	    // create new document graph
-	    docGraph = new DocumentGraph();
+	    docGraph = new DocGraph(docGraphId++);
 	    // and start with a unexplored node
 	    docGraph.addNode(discoveryStartNode);
 	    operationCandidatesQueue = new LinkedList<Long>();

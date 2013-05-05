@@ -5,32 +5,32 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraph;
-import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraphExtractor;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocGraph;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocGraphExtractor;
 import org.graphbi.rdb2graph.util.graph.impl.Neo4jGraph;
 import org.junit.Test;
 
-public class OperationGraphExtractorTest extends GraphBITest {
+public class DocGraphExtractorTest extends GraphBITest {
 
     @Test
-    public void testOperationGraphExtractionOpGraphCount() {
-	DocumentGraphExtractor extractor = new DocumentGraphExtractor(
+    public void testDocGraphCount() {
+	DocGraphExtractor extractor = new DocGraphExtractor(
 		new Neo4jGraph(graphDb), nodeClassSuperClassMap);
-	List<DocumentGraph> opGraphs = extractor.extract();
+	List<DocGraph> opGraphs = extractor.extract();
 
 	Assert.assertEquals(2, opGraphs.size());
     }
 
     @Test
-    public void testOperationGraphExtractionOpGraphContent() {
-	DocumentGraphExtractor extractor = new DocumentGraphExtractor(
+    public void testDocGraphContent() {
+	DocGraphExtractor extractor = new DocGraphExtractor(
 		new Neo4jGraph(graphDb), nodeClassSuperClassMap);
-	List<DocumentGraph> opGraphs = extractor.extract();
+	List<DocGraph> opGraphs = extractor.extract();
 
 	Assert.assertEquals(2, opGraphs.size());
 	Set<Long> nodes;
 	Set<Long> edges;
-	for (DocumentGraph opGraph : opGraphs) {
+	for (DocGraph opGraph : opGraphs) {
 	    nodes = opGraph.getNodes();
 	    edges = opGraph.getEdges();
 	    // check if it's Sales OpGraph 1

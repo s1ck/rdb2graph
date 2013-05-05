@@ -22,8 +22,12 @@ public class Constants {
      */
     public static final String NODE_PK_KEY = "__pk__";
     /**
+     * Key for the docgraphs's identifier.
+     */
+    public static final String DOCGRAPH_ID = "__docgraph_id__";
+    /**
      * Key for the node's corresponding docgraph's position in the sorted.
-     * collection of all opgraphs.
+     * collection of all docgraphs.
      */
     public static final String DOCGRAPH_SORT_INDEX = "__docgraph_sortidx__";
     /**

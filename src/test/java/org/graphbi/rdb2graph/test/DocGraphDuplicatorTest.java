@@ -4,9 +4,9 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraph;
-import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraphDuplicator;
-import org.graphbi.rdb2graph.analysis.documentgraph.DocumentGraphExtractor;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocGraph;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocGraphDuplicator;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocGraphExtractor;
 import org.graphbi.rdb2graph.util.graph.impl.Neo4jGraph;
 import org.junit.Test;
 import org.neo4j.graphdb.Direction;
@@ -17,19 +17,19 @@ import org.neo4j.helpers.collection.IteratorUtil;
 import org.neo4j.test.TestGraphDatabaseFactory;
 import org.neo4j.tooling.GlobalGraphOperations;
 
-public class OperationGraphDuplicatorTest extends GraphBITest {
+public class DocGraphDuplicatorTest extends GraphBITest {
 
     @Test
-    public void testOperationGraphMovingResult() {
+    public void testDocGraphDuplicationResult() {
 	Neo4jGraph fromGraph = new Neo4jGraph(graphDb);
 	GraphDatabaseService toGraphDB = new TestGraphDatabaseFactory()
 		.newImpermanentDatabaseBuilder().newGraphDatabase();
 	Neo4jGraph toGraph = new Neo4jGraph(toGraphDB);
 
-	List<DocumentGraph> opGraphs = new DocumentGraphExtractor(fromGraph,
+	List<DocGraph> opGraphs = new DocGraphExtractor(fromGraph,
 		nodeClassSuperClassMap).extract();
 
-	DocumentGraphDuplicator mover = new DocumentGraphDuplicator(cfg,
+	DocGraphDuplicator mover = new DocGraphDuplicator(cfg,
 		fromGraph, toGraph);
 	mover.duplicate(opGraphs);
 
