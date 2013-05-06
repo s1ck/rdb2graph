@@ -15,12 +15,15 @@ import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;
+import org.graphbi.rdb2graph.analysis.Experiment;
 import org.graphbi.rdb2graph.analysis.documentgraph.DocGraph;
+import org.graphbi.rdb2graph.analysis.documentgraph.DocGraphDuplicator;
 import org.graphbi.rdb2graph.analysis.documentgraph.DocGraphExtractor;
 import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.AnalyzerResult;
 import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.DocGraphMeasureFunction;
 import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.NumericalAggregation;
 import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.StatisticsLogger;
+import org.graphbi.rdb2graph.analysis.documentgraph.experiments.GrandTotalAggregationExperiment;
 import org.graphbi.rdb2graph.transformation.Transformer;
 import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.DataSinkInfo;
@@ -155,27 +158,25 @@ public class RDB2Graph {
 		List<DocGraph> docGraphs = opGraphExtractor.extract();
 		new StatisticsLogger().analyze(docGraphs);
 
-		List<AnalyzerResult<Integer>> res = new NumericalAggregation()
-			.analyze(docGraphs,
-				new DocGraphMeasureFunction<Integer>() {
-
-				    @Override
-				    public Integer measure(DocGraph docGraph) {
-					return docGraph.getNodeCount()
-						+ docGraph.getEdgeCount();
-				    }
-				});
-		
-		for (AnalyzerResult<Integer> r : res) {
-		    log.info(r.getDocGraph().getId() + " -> " + r.getResult());
-		}
-
 		// copy them into the dedicated graph store
 		ReadWriteGraph targetGraphDB = ReadWriteGraphFactory
 			.getInstance(cfg.getOpGraphStore());
-		// new DocGraphDuplicator(cfg, gdbs, targetGraphDB)
-		// .duplicate(docGraphs);
+		new DocGraphDuplicator(cfg, gdbs, targetGraphDB)
+			.duplicate(docGraphs);
+	    } else if ("grand_total".equals(arg)) {
+		ReadOnlyGraph opGraphDB = ReadOnlyGraphFactory.getInstance(cfg
+			.getOpGraphStore());
+		DocGraphExtractor opGraphExtractor = new DocGraphExtractor(
+			gdbs, rDatabaseSchema);
+		// extract and analyze the results
+		List<DocGraph> docGraphs = opGraphExtractor.extract();
+		new StatisticsLogger().analyze(docGraphs);
+
+		Experiment exp = new GrandTotalAggregationExperiment(opGraphDB,
+			docGraphs);
+		exp.run();
 	    }
+
 	}
     }
 }
