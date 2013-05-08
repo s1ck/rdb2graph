@@ -176,7 +176,7 @@ public class RDB2Graph {
 		ReadOnlyGraph opGraphDB = ReadOnlyGraphFactory.getInstance(cfg
 			.getOpGraphStore());
 		DocGraphExtractor opGraphExtractor = new DocGraphExtractor(
-			gdbs, rDatabaseSchema);
+			opGraphDB, rDatabaseSchema);
 		// extract and analyze the results
 		List<DocGraph> docGraphs = opGraphExtractor.extract();
 		new StatisticsLogger().analyze(docGraphs);
