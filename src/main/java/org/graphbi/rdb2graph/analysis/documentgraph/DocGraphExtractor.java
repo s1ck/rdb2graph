@@ -12,6 +12,7 @@ import org.apache.commons.lang.time.StopWatch;
 import org.apache.ddlutils.model.Database;
 import org.apache.ddlutils.model.Table;
 import org.apache.log4j.Logger;
+import org.graphbi.rdb2graph.util.config.Constants;
 import org.graphbi.rdb2graph.util.config.NodeSuperClass;
 import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
 
@@ -42,8 +43,7 @@ public class DocGraphExtractor {
 	this.nodeClassSuperClassMap = nodeClassSuperClassMap;
     }
 
-    public DocGraphExtractor(ReadOnlyGraph graphWrapper,
-	    Database relationalDB) {
+    public DocGraphExtractor(ReadOnlyGraph graphWrapper, Database relationalDB) {
 	if (relationalDB == null) {
 	    throw new IllegalArgumentException(
 		    "relationalModel must not be null.");
@@ -101,12 +101,19 @@ public class DocGraphExtractor {
 	Long[] nextCandidates = null;
 	// v_n
 	Long nextCandidate = null;
-	
+
 	Long docGraphId = 0L;
 
 	while ((discoveryStartNode = globalCandidatesQueue.peek()) != null) {
-	    // create new document graph
-	    docGraph = new DocGraph(docGraphId++);
+	    if (graphDB.getNodeProperties(discoveryStartNode).containsKey(
+		    Constants.DOCGRAPH_ID)) {
+		docGraph = new DocGraph((Long) graphDB.getNodeProperties(
+			discoveryStartNode).get(Constants.DOCGRAPH_ID));
+	    } else {
+		// create new document graph
+		docGraph = new DocGraph(docGraphId++);
+	    }
+
 	    // and start with a unexplored node
 	    docGraph.addNode(discoveryStartNode);
 	    operationCandidatesQueue = new LinkedList<Long>();

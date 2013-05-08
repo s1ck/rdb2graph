@@ -38,4 +38,12 @@ public class Constants {
      * Key for the nodes' corresponding docgraph's edge count.
      */
     public static final String DOCGRAPH_EDGE_COUNT = "__docgraph_edgecnt__";
+    /**
+     * Attribute value for document nodes.
+     */
+    public static final String NODE_SUPER_CLASS_DOCUMENT_VALUE = "DOCUMENT";
+    /**
+     * Attribute value for resource nodes.
+     */
+    public static final String NODE_SUPER_CLASS_RESOURCE_VALUE = "RESOURCE";
 }

@@ -6,9 +6,9 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<properties>
-	   <neo4j-version>1.8.1</neo4j-version>
+		<neo4j-version>1.8.1</neo4j-version>
 	</properties>
-	
+
 
 	<dependencies>
 		<dependency>
@@ -54,6 +54,11 @@
 			<version>3.2.1</version>
 		</dependency>
 		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.1</version>
@@ -77,7 +82,22 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.1</version>
 				<configuration>
-					<mainClass>org.graphbi.rdb2graph.RDB2Graph</mainClass>
+					<executable>java</executable>
+					<arguments>
+						<argument>-server</argument>
+						<!-- parallel/concurrent garbage collector -->
+						<argument>-XX:+UseConcMarkSweepGC</argument>
+						<argument>-d64</argument>						
+						<argument>-Xmx2048m</argument>
+						<argument>-classpath</argument>
+						<classpath />
+						<argument>org.graphbi.rdb2graph.RDB2Graph</argument>
+						<argument>-r</argument>
+						<argument>erpnext-sample-ddl.xml</argument>
+						<argument>-a</argument>
+						<argument>grand_total</argument>
+					</arguments>
+					<!-- <mainClass>org.graphbi.rdb2graph.RDB2Graph</mainClass> -->
 					<!-- <arguments> -->
 					<!-- <argument>config.xml</argument> -->
 					<!-- </arguments> -->

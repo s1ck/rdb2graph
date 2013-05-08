@@ -1,7 +1,12 @@
 package org.graphbi.rdb2graph;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -11,6 +16,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.io.FileUtils;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
@@ -24,6 +31,7 @@ import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.DocGraphMeasureFunc
 import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.NumericalAggregation;
 import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.StatisticsLogger;
 import org.graphbi.rdb2graph.analysis.documentgraph.experiments.GrandTotalAggregationExperiment;
+import org.graphbi.rdb2graph.analysis.documentgraph.experiments.ResourceInvolvementExperiment;
 import org.graphbi.rdb2graph.transformation.Transformer;
 import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.DataSinkInfo;
@@ -32,6 +40,7 @@ import org.graphbi.rdb2graph.util.graph.ReadOnlyGraph;
 import org.graphbi.rdb2graph.util.graph.ReadOnlyGraphFactory;
 import org.graphbi.rdb2graph.util.graph.ReadWriteGraph;
 import org.graphbi.rdb2graph.util.graph.ReadWriteGraphFactory;
+import org.graphbi.rdb2graph.util.graph.impl.analyzer.NeoResourceInvolvementExtractor;
 import org.graphbi.rdb2graph.util.rdb.RelationalDatabasePlatformFactory;
 
 @SuppressWarnings("static-access")
@@ -172,11 +181,19 @@ public class RDB2Graph {
 		List<DocGraph> docGraphs = opGraphExtractor.extract();
 		new StatisticsLogger().analyze(docGraphs);
 
-		Experiment exp = new GrandTotalAggregationExperiment(opGraphDB,
-			docGraphs);
-		exp.run();
+		new GrandTotalAggregationExperiment(opGraphDB, docGraphs).run();
+	    } else if ("involvement".equals(arg)) {
+		ReadOnlyGraph opGraphDB = ReadOnlyGraphFactory.getInstance(cfg
+			.getOpGraphStore());
+		DocGraphExtractor opGraphExtractor = new DocGraphExtractor(
+			opGraphDB, rDatabaseSchema);
+		// extract and analyze the results
+		List<DocGraph> docGraphs = opGraphExtractor.extract();
+		new StatisticsLogger().analyze(docGraphs);
+		
+		new ResourceInvolvementExperiment(opGraphDB, docGraphs,
+			new NeoResourceInvolvementExtractor(opGraphDB)).run();
 	    }
-
 	}
     }
 }

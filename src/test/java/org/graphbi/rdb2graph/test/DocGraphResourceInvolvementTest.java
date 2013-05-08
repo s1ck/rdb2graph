@@ -53,18 +53,12 @@ public class DocGraphResourceInvolvementTest extends GraphBITest {
 		toGraphDB);
 	Map<String, Set<Long>> associations = resourceExtractor.extract(
 		docGraphs, null, interestingResources, interestingDocuments);
-
+	
 	Assert.assertNotNull(associations);
-	Assert.assertEquals(9, associations.size());
+	Assert.assertEquals(5, associations.size());
+	
 
 	String pattern;
-	pattern = "Tom<-processedBy-SalesOrder<-bills-Invoice<-causedBy-InvoiceItem";
-	Assert.assertTrue(associations.containsKey(pattern));
-	Assert.assertEquals(1, associations.get(pattern).size()); // 1
-
-	pattern = "Tom<-sentBy-Quotation<-basedOn-SalesOrder";
-	Assert.assertTrue(associations.containsKey(pattern));
-	Assert.assertEquals(1, associations.get(pattern).size()); // 1
 
 	pattern = "John<-createdBy-Invoice-bills->SalesOrder<-bills-Invoice";
 	Assert.assertTrue(associations.containsKey(pattern));
@@ -78,15 +72,7 @@ public class DocGraphResourceInvolvementTest extends GraphBITest {
 	Assert.assertTrue(associations.containsKey(pattern));
 	Assert.assertEquals(1, associations.get(pattern).size()); // 0
 
-	pattern = "Tom<-sentBy-Quotation<-basedOn-SalesOrder<-bills-Invoice<-causedBy-InvoiceItem";
-	Assert.assertTrue(associations.containsKey(pattern));
-	Assert.assertEquals(1, associations.get(pattern).size()); // 1
-
 	pattern = "Tom<-processedBy-SalesOrder<-bills-Invoice";
-	Assert.assertTrue(associations.containsKey(pattern));
-	Assert.assertEquals(1, associations.get(pattern).size()); // 1
-
-	pattern = "John<-createdBy-Invoice<-causedBy-InvoiceItem";
 	Assert.assertTrue(associations.containsKey(pattern));
 	Assert.assertEquals(1, associations.get(pattern).size()); // 1
 

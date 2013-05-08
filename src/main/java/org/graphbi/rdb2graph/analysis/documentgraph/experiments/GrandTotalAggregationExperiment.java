@@ -1,5 +1,9 @@
 package org.graphbi.rdb2graph.analysis.documentgraph.experiments;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +81,25 @@ public class GrandTotalAggregationExperiment implements Experiment {
 			return false;
 		    }
 		});
+//	BufferedWriter bw = null;
+//	try {
+//	    bw = new BufferedWriter(new FileWriter(new File("measure.csv")));
+//	    for (AnalyzerResult<Double> res : results) {
+//		bw.write(String.format("%d\t%.2f\n", res.getDocGraph()
+//			.getId(), res.getResult()));
+//	    }
+//	    bw.flush();
+//	} catch (Exception e) {
+//
+//	} finally {
+//	    try {
+//		bw.close();
+//	    } catch (IOException e) {
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//	    }
+//	}
+
 	for (AnalyzerResult<Double> res : results) {
 	    log.info(String.format("%d (%d, %d) => %.2f", res.getDocGraph()
 		    .getId(), res.getDocGraph().getNodeCount(), res

@@ -20,6 +20,7 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.Traversal;
 
 public class NeoResourceInvolvementExtractor implements
@@ -70,32 +71,46 @@ public class NeoResourceInvolvementExtractor implements
 	Set<Node> relevantDocuments = null;
 	String r = null;
 	Node v_p = null;
+	boolean validPath = true;
+	int pCnt = 0;
+	log.info(String.format("Starting analysis of %d document graphs",
+		filteredDocGraphs.size()));
 	for (DocGraph docGraph : filteredDocGraphs) {
+	    log.info(String.format("Analyzing DocGraph[%d] (%d, %d)",
+		    docGraph.getId(), docGraph.getNodeCount(),
+		    docGraph.getEdgeCount()));
+	    pCnt = 0;
 	    // V_R <- G_d.V.where({v|tau(mu(v)) in C_R})
 	    relevantResources = filterNodesByClass(docGraph.getNodes(),
 		    resourceClasses);
 	    // V_R <- G_d.V.where({v|tau(mu(v)) in C_D})
 	    relevantDocuments = filterNodesByClass(docGraph.getNodes(),
 		    documentClasses);
+
+	    preProcessGraph(docGraph, resourceClasses);
+
 	    for (Node v_r : relevantResources) {
 		for (Node v_d : relevantDocuments) {
 		    // P <- G_d.paths(v_R,v_D)
 		    for (Path p : finder.findAllPaths(v_r, v_d)) {
+			validPath = true;
 			r = String.format("%s",
 				v_r.getProperty(Constants.ID_KEY));
 			v_p = v_r;
 			for (Relationship e : p.relationships()) {
 			    if (e.getStartNode().getId() == v_p.getId()) {
-				if (getNodeSuperClass(e.getEndNode()).equals(
-					"R")) {
+				if (getNodeSuperClass(e.getEndNode())
+					.equals(Constants.NODE_SUPER_CLASS_RESOURCE_VALUE)) {
+				    validPath = false;
 				    break;
 				}
 				r = String.format("%s-%s->%s", r, e.getType(),
 					getNodeClass(e.getEndNode()));
 				v_p = e.getEndNode();
 			    } else {
-				if (getNodeSuperClass(e.getStartNode()).equals(
-					"R")) {
+				if (getNodeSuperClass(e.getStartNode())
+					.equals(Constants.NODE_SUPER_CLASS_RESOURCE_VALUE)) {
+				    validPath = false;
 				    break;
 				}
 				r = String.format("%s<-%s-%s", r, e.getType(),
@@ -104,13 +119,59 @@ public class NeoResourceInvolvementExtractor implements
 			    }
 			}
 			// R_D.add(<r, G_d>)
-			associations = addPatternDocGraphAssociation(
-				associations, r, docGraph);
+			if (validPath) {
+			    associations = addPatternDocGraphAssociation(
+				    associations, r, docGraph);
+			    pCnt++;
+			}
 		    }
+		}
+
+	    }
+	    log.info(String.format("%d patterns in DocGraph[%d]", pCnt,
+		    docGraph.getId()));
+	}
+	return associations;
+    }
+
+    /**
+     * Removes all nodes with non-valid resource classes from the graph.
+     * 
+     * @param docGraph
+     * @param validResourceClasses
+     */
+    private void preProcessGraph(DocGraph docGraph,
+	    Set<String> validResourceClasses) {
+	log.info(String.format("Preprocessing DocGraph[%d]", docGraph.getId()));
+	Node n;
+	int cnt = 0;
+	Transaction tx;
+	for (Long nodeId : docGraph.getNodes()) {
+	    n = graphDB.getNodeById(nodeId);
+	    // node's class is resource class and it's not in the valid set
+	    if (n.hasProperty(Constants.NODE_SUPER_CLASS_KEY)
+		    && n.getProperty(Constants.NODE_SUPER_CLASS_KEY).equals(
+			    Constants.NODE_SUPER_CLASS_RESOURCE_VALUE)
+		    && !validResourceClasses.contains(getNodeClass(n))) {
+		tx = graphDB.beginTx();
+		try {
+
+		    log.info("Deleting " + n);
+		    for (Relationship e : n.getRelationships()) {
+			e.delete();
+		    }
+		    n.delete();
+		    tx.success();
+		} finally {
+		    tx.finish();
+		    cnt++;
 		}
 	    }
 	}
-	return associations;
+
+	log.info(String.format(
+		"Preprocessing removed %d nodes from DocGraph[%d]", cnt,
+		docGraph.getId()));
     }
 
     private Set<Node> filterNodesByClass(Set<Long> nodes,
@@ -153,7 +214,7 @@ public class NeoResourceInvolvementExtractor implements
 
     private void initFinder() {
 	this.finder = GraphAlgoFactory.allSimplePaths(
-		Traversal.expanderForAllTypes(), 10);
+		Traversal.expanderForAllTypes(), 7);
     }
 
     private Map<String, Set<Long>> addPatternDocGraphAssociation(

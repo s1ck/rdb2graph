@@ -70,7 +70,7 @@ public class GraphBITest {
 
     @Before
     public void prepareTestDatabase() {
-	cfg = new Config(RDB2Graph.class.getResource("/config.properties")
+	cfg = new Config(RDB2Graph.class.getResource("/config_test.properties")
 		.getFile());
 	cfg.parse();
 
@@ -162,25 +162,29 @@ public class GraphBITest {
 	    /** Resource Nodes */
 	    // User Tom
 	    Node tom = graphDb.createNode();
-	    tom.setProperty(Constants.NODE_SUPER_CLASS_KEY, "R");
+	    tom.setProperty(Constants.NODE_SUPER_CLASS_KEY,
+		    Constants.NODE_SUPER_CLASS_RESOURCE_VALUE);
 	    tom.setProperty(Constants.CLASS_KEY, NODE_CLASS_USER);
 	    tom.setProperty(Constants.ID_KEY, KEY_TOM);
 	    nodeIdMap.put(KEY_TOM, tom.getId());
 	    // User John
 	    Node john = graphDb.createNode();
-	    john.setProperty(Constants.NODE_SUPER_CLASS_KEY, "R");
+	    john.setProperty(Constants.NODE_SUPER_CLASS_KEY,
+		    Constants.NODE_SUPER_CLASS_RESOURCE_VALUE);
 	    john.setProperty(Constants.CLASS_KEY, NODE_CLASS_USER);
 	    john.setProperty(Constants.ID_KEY, KEY_JOHN);
 	    nodeIdMap.put(KEY_JOHN, john.getId());
 	    // GLAccount GLExpense
 	    Node gLAExpense = graphDb.createNode();
-	    gLAExpense.setProperty(Constants.NODE_SUPER_CLASS_KEY, "R");
+	    gLAExpense.setProperty(Constants.NODE_SUPER_CLASS_KEY,
+		    Constants.NODE_SUPER_CLASS_RESOURCE_VALUE);
 	    gLAExpense.setProperty(Constants.CLASS_KEY, NODE_CLASS_GLACCOUNT);
 	    gLAExpense.setProperty(Constants.ID_KEY, KEY_EXPENSE);
 	    nodeIdMap.put(KEY_EXPENSE, gLAExpense.getId());
 	    // GLAccount GLRevenue
 	    Node gLARevenue = graphDb.createNode();
-	    gLARevenue.setProperty(Constants.NODE_SUPER_CLASS_KEY, "R");
+	    gLARevenue.setProperty(Constants.NODE_SUPER_CLASS_KEY,
+		    Constants.NODE_SUPER_CLASS_RESOURCE_VALUE);
 	    gLARevenue.setProperty(Constants.CLASS_KEY, NODE_CLASS_GLACCOUNT);
 	    gLARevenue.setProperty(Constants.ID_KEY, KEY_REVENUE);
 	    nodeIdMap.put(KEY_REVENUE, gLARevenue.getId());
