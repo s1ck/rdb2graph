@@ -68,7 +68,6 @@ public class NeoResourceInvolvementExtractor implements
 
 	Set<Node> relevantResources = null;
 	Set<Node> relevantDocuments = null;
-	Iterable<Path> paths = null;
 	String r = null;
 	Node v_p = null;
 	for (DocGraph docGraph : filteredDocGraphs) {
@@ -81,17 +80,24 @@ public class NeoResourceInvolvementExtractor implements
 	    for (Node v_r : relevantResources) {
 		for (Node v_d : relevantDocuments) {
 		    // P <- G_d.paths(v_R,v_D)
-		    paths = finder.findAllPaths(v_r, v_d);
-		    for (Path p : paths) {
+		    for (Path p : finder.findAllPaths(v_r, v_d)) {
 			r = String.format("%s",
 				v_r.getProperty(Constants.ID_KEY));
 			v_p = v_r;
 			for (Relationship e : p.relationships()) {
 			    if (e.getStartNode().getId() == v_p.getId()) {
+				if (getNodeSuperClass(e.getEndNode()).equals(
+					"R")) {
+				    break;
+				}
 				r = String.format("%s-%s->%s", r, e.getType(),
 					getNodeClass(e.getEndNode()));
 				v_p = e.getEndNode();
 			    } else {
+				if (getNodeSuperClass(e.getStartNode()).equals(
+					"R")) {
+				    break;
+				}
 				r = String.format("%s<-%s-%s", r, e.getType(),
 					getNodeClass(e.getStartNode()));
 				v_p = e.getStartNode();
@@ -132,6 +138,14 @@ public class NeoResourceInvolvementExtractor implements
     private String getNodeClass(Node n) {
 	if (n.hasProperty(Constants.CLASS_KEY)) {
 	    return (String) n.getProperty(Constants.CLASS_KEY);
+	} else {
+	    return "";
+	}
+    }
+
+    private String getNodeSuperClass(Node n) {
+	if (n.hasProperty(Constants.NODE_SUPER_CLASS_KEY)) {
+	    return (String) n.getProperty(Constants.NODE_SUPER_CLASS_KEY);
 	} else {
 	    return "";
 	}
