@@ -44,11 +44,10 @@ public class DocGraphDuplicatorTest extends GraphBITest {
 			tx.success();
 		}
 
-		// 1 root node
 		// 12 document nodes
 		// + 2 * 4 resource nodes
 		// + 6 reference nodes
-		Assert.assertEquals(1 + 12 + (2 * 4) + 6, n);
+		Assert.assertEquals(12 + (2 * 4) + 6, n);
 		// 9 edges in SalesGraph 1
 		// + 13 edges in SalesGraph 2
 		// + 16 (+4 duplicated resource nodes) edges for INSTANCE relationship
