@@ -270,7 +270,7 @@ public class Neo4jGraph implements ReadWriteGraph {
 			throw new IllegalArgumentException("edgeId must not be null");
 		}
 		try {
-			return graphdb.getRelationshipById(edgeId).getType().toString();
+			return graphdb.getRelationshipById(edgeId).getType().name().toString();
 		} catch (NotFoundException ex) {
 			log.error(ex);
 		}

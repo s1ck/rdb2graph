@@ -23,7 +23,6 @@ import org.graphbi.rdb2graph.util.config.Config;
 import org.graphbi.rdb2graph.util.config.Constants;
 import org.graphbi.rdb2graph.util.config.NodeSuperClass;
 import org.graphbi.rdb2graph.util.graph.ReadWriteGraph;
-import org.neo4j.cypher.internal.commands.expressions.Property;
 
 public class Transformer {
 
