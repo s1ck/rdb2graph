@@ -32,9 +32,9 @@ rdb2graph
 
 Run: 
 
-* `mvn exec:java` to see the available options
-* `mvn exec:java -Dexec.args="-c config.xml"` to apply your own config xml (default is resources/config.xml)
-* `mvn exec:java -Dexec.args="-e ddl.xml"` to extract the database schema into ddl.xml
-* `mvn exec:java -Dexec.args="-t"` to transform the relational database form source system to target system
-* `mvn exec:java -Dexec.args="-r erpnext-sample-ddl.xml -t"` to read the schema from a local file instead of the live database
-* `mvn exec:java -Dexec.args="-r erpnext-sample-ddl.xml -a opgraph"` to read the schema from a local file and analyze the graph for operation graphs
+* `mvn exec:exec -Dexec.executable="java"` to see the available options
+* `mvn exec:exec -Dexec.executable="java" -Dexec.args="-c config.xml"` to apply your own config xml (default is resources/config.xml)
+* `mvn exec:exec -Dexec.executable="java" -Dexec.args="-e ddl.xml"` to extract the database schema into ddl.xml
+* `mvn exec:exec -Dexec.executable="java" -Dexec.args="-t"` to transform the relational database form source system to target system
+* `mvn exec:exec -Dexec.executable="java" -Dexec.args="-r erpnext-sample-ddl.xml -t"` to read the schema from a local file instead of the live database
+* `mvn exec:exec -Dexec.executable="java" -Dexec.args="-r erpnext-sample-ddl.xml -a opgraph"` to read the schema from a local file and analyze the graph for operation graphs

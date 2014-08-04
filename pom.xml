@@ -80,24 +80,22 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.2.1</version>
+				<version>1.3.2</version>
 				<configuration>
 					<executable>java</executable>
 					<arguments>
 						<argument>-server</argument>
-						<!-- parallel/concurrent garbage collector -->
 						<argument>-XX:+UseConcMarkSweepGC</argument>
-						<argument>-d64</argument>						
+						<argument>-d64</argument>
 						<argument>-Xmx2048m</argument>
 						<argument>-classpath</argument>
 						<classpath />
 						<argument>org.graphbi.rdb2graph.RDB2Graph</argument>
-						<argument>-r</argument>
-						<argument>erpnext-sample-ddl.xml</argument>
-						<argument>-a</argument>
-						<argument>grand_total</argument>
+						<!-- <argument>-r</argument> -->
+						<!-- <argument>erpnext-sample-ddl.xml</argument> -->
+						<!-- <argument>-a</argument> -->
+						<!-- <argument>grand_total</argument> -->
 					</arguments>
-					<!-- <mainClass>org.graphbi.rdb2graph.RDB2Graph</mainClass> -->
 					<!-- <arguments> -->
 					<!-- <argument>config.xml</argument> -->
 					<!-- </arguments> -->
