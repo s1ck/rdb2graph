@@ -1,0 +1,274 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<database xmlns:R2G='http://graphbi.org/schema/0.1' name='ERP'
+	xmlns='http://db.apache.org/ddlutils/schema/1.1'>
+	<table name="BusinessRelation" description="R" R2G:ignore='false' R2G:nodeClass='BusinessRelation'>
+		<column name="kind" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+		<column name="name" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+		<column name="num" primaryKey="true" required="true" type="VARCHAR"
+			size="64" default="" autoIncrement="false" />
+		<column name="type" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+	</table>
+	<table name="DeliveryNote" description="D" R2G:ignore='false' R2G:nodeClass='DeliveryNote'>
+		<column name="contains" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="date" primaryKey="false" required="false" type="DATE"
+			size="10" autoIncrement="false" />
+		<column name="num" primaryKey="true" required="true" type="VARCHAR"
+			size="64" default="" autoIncrement="false" />
+		<column name="operated_by" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="tracking_code" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<foreign-key foreignTable="BusinessRelation" name="DeliveryNote_ibfk_2"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='operatedBy'>
+			<reference local="operated_by" foreign="num" />
+		</foreign-key>
+		<foreign-key foreignTable="PurchOrder" name="DeliveryNote_ibfk_1"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='contains'>
+			<reference local="contains" foreign="num" />
+		</foreign-key>
+		<index name="contains">
+			<index-column name="contains" />
+		</index>
+		<index name="operated_by">
+			<index-column name="operated_by" />
+		</index>
+	</table>
+	<table name="Employee" description="R" R2G:ignore='false' R2G:nodeClass='Employee'>
+		<column name="gender" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+		<column name="kind" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+		<column name="name" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+		<column name="num" primaryKey="true" required="true" type="VARCHAR"
+			size="64" default="" autoIncrement="false" />
+	</table>
+	<table name="Product" description="R" R2G:ignore='false' R2G:nodeClass='Product'>
+		<column name="category" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="kind" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+		<column name="name" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+		<column name="num" primaryKey="true" required="true" type="VARCHAR"
+			size="64" default="" autoIncrement="false" />
+		<column name="price" primaryKey="false" required="false" type="REAL"
+			size="12" autoIncrement="false" />
+	</table>
+	<table name="PurchInvoice" description="D" R2G:ignore='false' R2G:nodeClass='PurchInvoice'>
+		<column name="created_for" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="date" primaryKey="false" required="false" type="DATE"
+			size="10" autoIncrement="false" />
+		<column name="expense" primaryKey="false" required="false"
+			type="REAL" size="12" autoIncrement="false" />
+		<column name="num" primaryKey="true" required="true" type="VARCHAR"
+			size="64" default="" autoIncrement="false" />
+		<foreign-key foreignTable="PurchOrder" name="PurchInvoice_ibfk_1"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='createdFor'>
+			<reference local="created_for" foreign="num" />
+		</foreign-key>
+		<index name="created_for">
+			<index-column name="created_for" />
+		</index>
+	</table>
+	<table name="PurchOrder" description="D" R2G:ignore='false' R2G:nodeClass='PurchOrder'>
+		<column name="date" primaryKey="false" required="false" type="DATE"
+			size="10" autoIncrement="false" />
+		<column name="num" primaryKey="true" required="true" type="VARCHAR"
+			size="64" default="" autoIncrement="false" />
+		<column name="placed_at" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="processed_by" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="serves" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+		<column name="status" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+		<foreign-key foreignTable="SalesOrder" name="PurchOrder_ibfk_3"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='serves'>
+			<reference local="serves" foreign="num" />
+		</foreign-key>
+		<foreign-key foreignTable="BusinessRelation" name="PurchOrder_ibfk_1"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='placedAt'>
+			<reference local="placed_at" foreign="num" />
+		</foreign-key>
+		<foreign-key foreignTable="Employee" name="PurchOrder_ibfk_2"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='processedBy'>
+			<reference local="processed_by" foreign="num" />
+		</foreign-key>
+		<index name="placed_at">
+			<index-column name="placed_at" />
+		</index>
+		<index name="processed_by">
+			<index-column name="processed_by" />
+		</index>
+		<index name="serves">
+			<index-column name="serves" />
+		</index>
+	</table>
+	<table name="PurchOrderLine" description="D" R2G:ignore='false' R2G:nodeClass='PurchOrderLine'>
+		<column name="contains" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="part_of" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="purch_price" primaryKey="false" required="false"
+			type="REAL" size="12" autoIncrement="false" />
+		<column name="qty" primaryKey="false" required="false" type="INTEGER"
+			size="10" autoIncrement="false" />
+		<column name="pk" primaryKey="true" required="true" type="INTEGER"
+			size="10" autoIncrement="true" />
+		<foreign-key foreignTable="PurchOrder" name="PurchOrderLine_ibfk_2"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='partOf'>
+			<reference local="part_of" foreign="num" />
+		</foreign-key>
+		<foreign-key foreignTable="Product" name="PurchOrderLine_ibfk_1"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='contains'>
+			<reference local="contains" foreign="num" />
+		</foreign-key>
+		<index name="contains">
+			<index-column name="contains" />
+		</index>
+		<index name="part_of">
+			<index-column name="part_of" />
+		</index>
+	</table>
+	<table name="Quotation" description="D" R2G:ignore='false' R2G:nodeClass='Quotation'>
+		<column name="date" primaryKey="false" required="false" type="DATE"
+			size="10" autoIncrement="false" />
+		<column name="num" primaryKey="true" required="true" type="VARCHAR"
+			size="64" default="" autoIncrement="false" />
+		<column name="sent_by" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="sent_to" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="status" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+		<foreign-key foreignTable="BusinessRelation" name="Quotation_ibfk_2"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='sentTo'>
+			<reference local="sent_to" foreign="num" />
+		</foreign-key>
+		<foreign-key foreignTable="Employee" name="Quotation_ibfk_1"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='sentBy'>
+			<reference local="sent_by" foreign="num" />
+		</foreign-key>
+		<index name="sent_by">
+			<index-column name="sent_by" />
+		</index>
+		<index name="sent_to">
+			<index-column name="sent_to" />
+		</index>
+	</table>
+	<table name="QuotationLine" description="D" R2G:ignore='false' R2G:nodeClass='QuotationLine'>
+		<column name="contains" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="part_of" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="purch_price" primaryKey="false" required="false"
+			type="REAL" size="12" autoIncrement="false" />
+		<column name="qty" primaryKey="false" required="false" type="INTEGER"
+			size="10" autoIncrement="false" />
+		<column name="sales_price" primaryKey="false" required="false"
+			type="REAL" size="12" autoIncrement="false" />
+		<column name="pk" primaryKey="true" required="true" type="INTEGER"
+			size="10" autoIncrement="true" />
+		<foreign-key foreignTable="Quotation" name="QuotationLine_ibfk_2"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='partOf'>
+			<reference local="part_of" foreign="num" />
+		</foreign-key>
+		<foreign-key foreignTable="Product" name="QuotationLine_ibfk_1"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='contains'>
+			<reference local="contains" foreign="num" />
+		</foreign-key>
+		<index name="contains">
+			<index-column name="contains" />
+		</index>
+		<index name="part_of">
+			<index-column name="part_of" />
+		</index>
+	</table>
+	<table name="SalesInvoice" description="D" R2G:ignore='false' R2G:nodeClass='SalesInvoice'>
+		<column name="created_for" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="date" primaryKey="false" required="false" type="DATE"
+			size="10" autoIncrement="false" />
+		<column name="num" primaryKey="true" required="true" type="VARCHAR"
+			size="64" default="" autoIncrement="false" />
+		<column name="revenue" primaryKey="false" required="false"
+			type="REAL" size="12" autoIncrement="false" />
+		<foreign-key foreignTable="SalesOrder" name="SalesInvoice_ibfk_1"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='createdFor'>
+			<reference local="created_for" foreign="num" />
+		</foreign-key>
+		<index name="created_for">
+			<index-column name="created_for" />
+		</index>
+	</table>
+	<table name="SalesOrder" description="D" R2G:ignore='false' R2G:nodeClass='SalesOrder'>
+		<column name="based_on" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="date" primaryKey="false" required="false" type="DATE"
+			size="10" autoIncrement="false" />
+		<column name="delivery_date" primaryKey="false" required="false"
+			type="DATE" size="10" autoIncrement="false" />
+		<column name="num" primaryKey="true" required="true" type="VARCHAR"
+			size="64" default="" autoIncrement="false" />
+		<column name="processed_by" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="received_from" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="status" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+		<foreign-key foreignTable="BusinessRelation" name="SalesOrder_ibfk_3"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='receivedFrom'>
+			<reference local="received_from" foreign="num" />
+		</foreign-key>
+		<foreign-key foreignTable="Quotation" name="SalesOrder_ibfk_1"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='basedOn'>
+			<reference local="based_on" foreign="num" />
+		</foreign-key>
+		<foreign-key foreignTable="Employee" name="SalesOrder_ibfk_2"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='processedBy'>
+			<reference local="processed_by" foreign="num" />
+		</foreign-key>
+		<index name="based_on">
+			<index-column name="based_on" />
+		</index>
+		<index name="processed_by">
+			<index-column name="processed_by" />
+		</index>
+		<index name="received_from">
+			<index-column name="received_from" />
+		</index>
+	</table>
+	<table name="SalesOrderLine" description="D" R2G:ignore='false' R2G:nodeClass='SalesOrderLine'>
+		<column name="contains" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="part_of" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="qty" primaryKey="false" required="false" type="INTEGER"
+			size="10" autoIncrement="false" />
+		<column name="sales_price" primaryKey="false" required="false"
+			type="REAL" size="12" autoIncrement="false" />
+		<column name="pk" primaryKey="true" required="true" type="INTEGER"
+			size="10" autoIncrement="true" />
+		<foreign-key foreignTable="SalesOrder" name="SalesOrderLine_ibfk_2"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='partOf'>
+			<reference local="part_of" foreign="num" />
+		</foreign-key>
+		<foreign-key foreignTable="Product" name="SalesOrderLine_ibfk_1"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='contains'>
+			<reference local="contains" foreign="num" />
+		</foreign-key>
+		<index name="contains">
+			<index-column name="contains" />
+		</index>
+		<index name="part_of">
+			<index-column name="part_of" />
+		</index>
+	</table>
+</database>

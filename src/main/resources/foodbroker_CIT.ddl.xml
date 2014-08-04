@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<database xmlns:R2G='http://graphbi.org/schema/0.1' name='CIT'
+	xmlns='http://db.apache.org/ddlutils/schema/1.1'>
+	<table name="Customer" description="R" R2G:ignore='false'
+		R2G:nodeClass='Customer'>
+		<column name="account" primaryKey="true" required="true" type="INTEGER"
+			size="10" default="0" autoIncrement="false" />
+		<column name="contact_phone" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="erp_busrel_num" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="name" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+	</table>
+	<table name="Ticket" description="D" R2G:ignore='false'
+		R2G:nodeClass='Ticket'>
+		<column name="allocated_to" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="concerns_erp_num" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="created_at" primaryKey="false" required="false"
+			type="DATE" size="10" autoIncrement="false" />
+		<column name="created_by" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="id" primaryKey="true" required="true" type="INTEGER"
+			size="10" default="0" autoIncrement="false" />
+		<column name="opened_by" primaryKey="false" required="false"
+			type="INTEGER" size="10" autoIncrement="false" />
+		<column name="problem" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<foreign-key foreignTable="Customer" name="Ticket_ibfk_3"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='openedBy'>
+			<reference local="opened_by" foreign="account" />
+		</foreign-key>
+		<foreign-key foreignTable="User" name="Ticket_ibfk_1"
+			onUpdate="restrict" onDelete="restrict" R2G:edgeClass='allocatedTo'>
+			<reference local="allocated_to" foreign="email" />
+		</foreign-key>
+		<foreign-key foreignTable="User" name="Ticket_ibfk_2"
+			onUpdate="restrict" onDelete="restrict"  R2G:edgeClass='createdBy'>
+			<reference local="created_by" foreign="email" />
+		</foreign-key>
+		<index name="allocated_to">
+			<index-column name="allocated_to" />
+		</index>
+		<index name="created_by">
+			<index-column name="created_by" />
+		</index>
+		<index name="opened_by">
+			<index-column name="opened_by" />
+		</index>
+	</table>
+	<table name="User" description="R" R2G:ignore='false'
+		R2G:nodeClass='User'>
+		<column name="email" primaryKey="true" required="true" type="VARCHAR"
+			size="64" default="" autoIncrement="false" />
+		<column name="erp_employee_num" primaryKey="false" required="false"
+			type="VARCHAR" size="64" autoIncrement="false" />
+		<column name="name" primaryKey="false" required="false" type="VARCHAR"
+			size="64" autoIncrement="false" />
+	</table>
+</database>
