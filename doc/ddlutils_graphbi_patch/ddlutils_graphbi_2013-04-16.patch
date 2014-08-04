@@ -1,0 +1,533 @@
+Index: .classpath
+===================================================================
+--- .classpath	(revision 1458454)
++++ .classpath	(working copy)
+@@ -1,10 +1,11 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <classpath>
+ 	<classpathentry kind="src" output="target/classes" path="src/main/java"/>
++	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources"/>
+ 	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
+-	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources"/>
+ 	<classpathentry excluding="**" kind="src" output="target/test-classes" path="src/test/resources"/>
+ 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
++	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER"/>
+ 	<classpathentry kind="con" path="org.devzuz.q.maven.jdt.core.mavenClasspathContainer"/>
+ 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
+ 	<classpathentry kind="output" path="target/classes"/>
+Index: .project
+===================================================================
+--- .project	(revision 1458454)
++++ .project	(working copy)
+@@ -21,8 +21,14 @@
+ 			<arguments>
+ 			</arguments>
+ 		</buildCommand>
++		<buildCommand>
++			<name>org.eclipse.m2e.core.maven2Builder</name>
++			<arguments>
++			</arguments>
++		</buildCommand>
+ 	</buildSpec>
+ 	<natures>
++		<nature>org.eclipse.m2e.core.maven2Nature</nature>
+ 		<nature>org.eclipse.jdt.core.javanature</nature>
+ 		<nature>org.maven.ide.eclipse.maven2Nature</nature>
+ 		<nature>org.devzuz.q.maven.jdt.core.mavenNature</nature>
+Index: src/main/java/org/apache/ddlutils/io/DatabaseIO.java
+===================================================================
+--- src/main/java/org/apache/ddlutils/io/DatabaseIO.java	(revision 1458454)
++++ src/main/java/org/apache/ddlutils/io/DatabaseIO.java	(working copy)
+@@ -64,7 +64,7 @@
+ 
+     /** The namespace used by DdlUtils. */
+     public static final String DDLUTILS_NAMESPACE = "http://db.apache.org/ddlutils/schema/1.1";
+-
++    
+     /** Qualified name of the column element. */
+     public static final QName QNAME_ELEMENT_COLUMN        = new QName(DDLUTILS_NAMESPACE, "column");
+     /** Qualified name of the database element. */
+@@ -116,6 +116,20 @@
+     public static final QName QNAME_ATTRIBUTE_TYPE              = new QName(DDLUTILS_NAMESPACE, "type");
+     /** Qualified name of the version attribute. */
+     public static final QName QNAME_ATTRIBUTE_VERSION           = new QName(DDLUTILS_NAMESPACE, "version");
++    
++    /** Additions for graphbi */
++    
++    /** The namespace used by GraphBI */
++    public static final String GRAPHBI_NAMESPACE = "http://graphbi.org/schema/0.1";
++    
++    /** Qualified name of the nodeClass attribute. */
++    public static final QName QNAME_ATTRIBUTE_NODE_CLASS = new QName(GRAPHBI_NAMESPACE, "nodeClass");
++    /** Qualified name of the edgeClass attribute. */
++    public static final QName QNAME_ATTRIBUTE_EDGE_CLASS = new QName(GRAPHBI_NAMESPACE, "edgeClass");
++    /** Qualified name of the ignore attribute. */
++    public static final QName QNAME_ATTRIBUTE_IGNORE = new QName(GRAPHBI_NAMESPACE, "ignore");
++    
++    /** EO Additions for graphbi */
+ 
+     /** The log. */
+     private final Log _log = LogFactory.getLog(DatabaseIO.class);
+@@ -428,6 +442,16 @@
+             {
+                 table.setDescription(xmlReader.getAttributeValue(idx));
+             }
++            /** Additions for graphbi */
++            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_NODE_CLASS))
++            {
++        	table.setNodeClass(xmlReader.getAttributeValue(idx));
++            }
++            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_IGNORE))
++            {
++        	table.setIgnore(getAttributeValueAsBoolean(xmlReader, idx));
++            }
++            /** EO Additions for graphbi */
+         }
+         readTableSubElements(xmlReader, table);
+         consumeRestOfElement(xmlReader);
+@@ -525,6 +549,12 @@
+             {
+                 column.setJavaName(xmlReader.getAttributeValue(idx));
+             }
++            /** Additions for graphbi */
++            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_IGNORE)) 
++            {
++        	column.setIgnore(getAttributeValueAsBoolean(xmlReader, idx));
++            }
++            /** EO Additions for graphbi */
+         }
+         consumeRestOfElement(xmlReader);
+         return column;
+@@ -560,6 +590,12 @@
+             {
+                 foreignKey.setOnDelete(getAttributeValueAsCascadeEnum(xmlReader, idx));
+             }
++            /** Additions for graphbi */
++            else if (isSameAs(attrQName, QNAME_ATTRIBUTE_EDGE_CLASS)) 
++            {
++        	foreignKey.setEdgeClass(xmlReader.getAttributeValue(idx));
++            }
++            /** EO Additions for graphbi */
+         }
+         readReferenceElements(xmlReader, foreignKey);
+         consumeRestOfElement(xmlReader);
+Index: src/main/java/org/apache/ddlutils/model/Column.java
+===================================================================
+--- src/main/java/org/apache/ddlutils/model/Column.java	(revision 1458454)
++++ src/main/java/org/apache/ddlutils/model/Column.java	(working copy)
+@@ -64,6 +64,9 @@
+     private int _scale;
+     /** The default value. */
+     private String _defaultValue;
++    
++    /** Additions for graphbi */
++    private boolean _ignore;
+ 
+     /**
+      * Returns the name of the column.
+@@ -473,6 +476,30 @@
+     {
+         _defaultValue = defaultValue;
+     }
++    
++    /** Additions for graphbi */
++    
++    /**
++     * Returns true if table is ignored, else false.
++     * 
++     * @return True if table is ignored, else false.
++     */
++    public boolean isIgnored() 
++    {
++	return _ignore;
++    }
++    
++    /**
++     * Sets the ignore flag of the table.
++     * 
++     * @param ignore Ignore flag
++     */
++    public void setIgnore(boolean ignore) 
++    {
++	_ignore = ignore;
++    }
++    
++    /** EO Additions for graphbi */
+ 
+     /**
+      * {@inheritDoc}
+Index: src/main/java/org/apache/ddlutils/model/ForeignKey.java
+===================================================================
+--- src/main/java/org/apache/ddlutils/model/ForeignKey.java	(revision 1458454)
++++ src/main/java/org/apache/ddlutils/model/ForeignKey.java	(working copy)
+@@ -51,6 +51,9 @@
+     private ListOrderedSet _references = new ListOrderedSet();
+     /** Whether this foreign key has an associated auto-generated index. */
+     private boolean _autoIndexPresent;
++    
++    /** Additions for graphbi */
++    private String _edgeClass;
+ 
+     /**
+      * Creates a new foreign key object that has no name.
+@@ -186,6 +189,30 @@
+         }
+         _onUpdate = onUpdate;
+     }
++    
++    /** Additions for graphbi */
++    
++    /**
++     * Returns the edgeClass of the foreign key.
++     * 
++     * @return The edgeClass
++     */
++    public String getEdgeClass() 
++    {
++	return _edgeClass;
++    }
++    
++    /**
++     * Sets the edgeClass for the foreign key.
++     * 
++     * @param edgeClass The edgeClass
++     */
++    public void setEdgeClass(String edgeClass) 
++    {
++	_edgeClass = edgeClass;
++    }
++    
++    /** EO Additions for graphbi */
+ 
+     /**
+      * Returns the number of references.
+Index: src/main/java/org/apache/ddlutils/model/Table.java
+===================================================================
+--- src/main/java/org/apache/ddlutils/model/Table.java	(revision 1458454)
++++ src/main/java/org/apache/ddlutils/model/Table.java	(working copy)
+@@ -59,7 +59,14 @@
+     private ArrayList _foreignKeys = new ArrayList();
+     /** The indices applied to this table. */
+     private ArrayList _indices = new ArrayList();
++    
++    /** Additions for graphbi */
+ 
++    /** The table's nodeClass. */
++    private String _nodeClass;
++    /** The table's ignore state. */
++    private boolean _ignore;
++
+     /**
+      * Returns the catalog of this table as read from the database.
+      * 
+@@ -169,6 +176,50 @@
+     {
+         return _columns.size();
+     }
++    
++    /** Additions for graphbi */
++    
++    /**
++     * Returns the nodeClass of the table.
++     * 
++     * @return The nodeClass
++     */
++    public String getNodeClass() 
++    {
++	return _nodeClass;
++    }
++    
++    /**
++     * Sets the nodeClass of the table.
++     * 
++     * @param nodeClass The nodeClass
++     */
++    public void setNodeClass(String nodeClass) 
++    {
++	_nodeClass = nodeClass;
++    }
++    
++    /**
++     * Returns the ignore state of the table
++     *  
++     * @return True if the table is ignored else false.
++     */
++    public boolean isIgnored() 
++    {
++	return _ignore;
++    }
++    
++    /**
++     * Set the ignore state of the table.
++     * 
++     * @param ignore True if the table shall be ignored.
++     */
++    public void setIgnore(boolean ignore) 
++    {
++	_ignore = ignore;
++    }
++    
++    /** EO Additions for graphbi */
+ 
+     /**
+      * Returns the column at the specified position.
+Index: src/main/java/org/apache/ddlutils/model/TypeMap.java
+===================================================================
+--- src/main/java/org/apache/ddlutils/model/TypeMap.java	(revision 1458454)
++++ src/main/java/org/apache/ddlutils/model/TypeMap.java	(working copy)
+@@ -134,6 +134,13 @@
+         registerJdbcType(Types.VARBINARY,     VARBINARY,     JdbcTypeCategoryEnum.BINARY);
+         registerJdbcType(Types.VARCHAR,       VARCHAR,       JdbcTypeCategoryEnum.TEXTUAL);
+ 
++        // Unicode datatypes
++        registerJdbcType(Types.NCHAR, "NCHAR", JdbcTypeCategoryEnum.TEXTUAL);
++        registerJdbcType(Types.NVARCHAR, "NVARCHAR", JdbcTypeCategoryEnum.TEXTUAL);
++        registerJdbcType(Types.NCLOB, "NCLOB", JdbcTypeCategoryEnum.TEXTUAL);
++        registerJdbcType(Types.LONGNVARCHAR, "LONGNVARCHAR", JdbcTypeCategoryEnum.TEXTUAL);
++
++
+         // Torque/Turbine extensions which we only support when reading from an XML schema
+         _typeNameToTypeCode.put("BOOLEANINT",  new Integer(Types.TINYINT));
+         _typeNameToTypeCode.put("BOOLEANCHAR", new Integer(Types.CHAR));
+Index: src/main/java/org/apache/ddlutils/platform/DatabaseMetaDataWrapper.java
+===================================================================
+--- src/main/java/org/apache/ddlutils/platform/DatabaseMetaDataWrapper.java	(revision 1458454)
++++ src/main/java/org/apache/ddlutils/platform/DatabaseMetaDataWrapper.java	(working copy)
+@@ -210,6 +210,22 @@
+     {
+         return getMetaData().getColumns(getCatalog(), getSchemaPattern(), tableNamePattern, columnNamePattern);
+     }
++    
++    /**
++     * Convenience method to return the column meta data using the configured catalog and defined
++     * schema pattern.
++     * 
++     * @param tableNamePattern  The pattern identifying for which tables to return info
++     * @param schemaNamePattern The pattern identifying the table's schema
++     * @param columnNamePattern The pattern identifying for which columns to return info
++     * @return The column meta data
++     * @throws SQLException If an error occurred retrieving the meta data
++     * @see DatabaseMetaData#getColumns(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
++     */
++    public ResultSet getColumns(String tableNamePattern, String schemaNamePattern, String columnNamePattern) throws SQLException
++    {
++        return getMetaData().getColumns(getCatalog(), schemaNamePattern, tableNamePattern, columnNamePattern);
++    }
+ 
+     /**
+      * Convenience method to return the primary key meta data using the configured catalog and
+@@ -224,6 +240,21 @@
+     {
+         return getMetaData().getPrimaryKeys(getCatalog(), getSchemaPattern(), tableNamePattern);
+     }
++    
++    /**
++     * Convenience method to return the primary key meta data using the configured catalog and defined
++     * schema pattern.
++     * 
++     * @param tableNamePattern The pattern identifying for which tables to return info
++     * @param schemaNamePattern The pattern identifying the table's schema
++     * @return The primary key meta data
++     * @throws SQLException If an error occurred retrieving the meta data
++     * @see DatabaseMetaData#getPrimaryKeys(java.lang.String, java.lang.String, java.lang.String)
++     */
++    public ResultSet getPrimaryKeys(String tableNamePattern, String schemaNamePattern) throws SQLException
++    {
++	return getMetaData().getPrimaryKeys(getCatalog(), schemaNamePattern, tableNamePattern);
++    }
+ 
+     /**
+      * Convenience method to return the foreign key meta data using the configured catalog and
+@@ -238,6 +269,23 @@
+     {
+         return getMetaData().getImportedKeys(getCatalog(), getSchemaPattern(), tableNamePattern);
+     }
++    
++    /**
++     * Convenience method to return the foreign key meta data using the configured catalog and
++     * schema pattern.
++     * 
++     * The schema pattern can be defined for the given table.
++     * 
++     * @param tableNamePattern The pattern identifying for which tables to return info
++     * @param schemaPattern The pattern defining in which schema the table is in
++     * @return The foreign key meta data
++     * @throws SQLException If an error occurred retrieving the meta data
++     * @see DatabaseMetaData#getImportedKeys(java.lang.String, java.lang.String, java.lang.String)
++     */
++    public ResultSet getForeignKeys(String tableNamePattern, String schemaPattern) throws SQLException
++    {
++	return getMetaData().getImportedKeys(getCatalog(), schemaPattern, tableNamePattern);
++    }
+ 
+     /**
+      * Convenience method to return the index meta data using the configured catalog and
+Index: src/main/java/org/apache/ddlutils/platform/JdbcModelReader.java
+===================================================================
+--- src/main/java/org/apache/ddlutils/platform/JdbcModelReader.java	(revision 1458454)
++++ src/main/java/org/apache/ddlutils/platform/JdbcModelReader.java	(working copy)
+@@ -579,6 +579,7 @@
+     protected Table readTable(DatabaseMetaDataWrapper metaData, Map values) throws SQLException
+     {
+         String tableName = (String)values.get("TABLE_NAME");
++        String tableSchema = values.containsKey("TABLE_SCHEM") ? (String) values.get("TABLE_SCHEM") : null;
+         Table  table     = null;
+         
+         if ((tableName != null) && (tableName.length() > 0))
+@@ -591,15 +592,23 @@
+             table.setSchema((String)values.get("TABLE_SCHEM"));
+             table.setDescription((String)values.get("REMARKS"));
+ 
+-            table.addColumns(readColumns(metaData, tableName));
+-            table.addForeignKeys(readForeignKeys(metaData, tableName));
++            table.addColumns(readColumns(metaData, tableName, tableSchema));
++            table.addForeignKeys(readForeignKeys(metaData, tableName, tableSchema));
+             table.addIndices(readIndices(metaData, tableName));
+ 
+-            Collection primaryKeys = readPrimaryKeyNames(metaData, tableName);
+-
++            Collection primaryKeys = readPrimaryKeyNames(metaData, tableName, tableSchema);
++            
++            Column col = null;
+             for (Iterator it = primaryKeys.iterator(); it.hasNext();)
+             {
+-                table.findColumn((String)it.next(), true).setPrimaryKey(true);
++        	col = table.findColumn((String) it.next(), true);
++        	// TODO: It seems that Microsoft JDBC doesn't support User defined datatypes (UDT)
++        	// If UDT is [part of] a primary key, the column will be null.
++        	if (col != null) 
++        	{
++        	    col.setPrimaryKey(true);
++        	}
++//                table.findColumn((String)it.next(), true).setPrimaryKey(true);
+             }
+ 
+             if (getPlatformInfo().isSystemIndicesReturned())
+@@ -759,7 +768,7 @@
+     {
+         return false;
+     }
+-
++    
+     /**
+      * Reads the column definitions for the indicated table.
+      * 
+@@ -769,11 +778,25 @@
+      */
+     protected Collection readColumns(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException
+     {
++	return readColumns(metaData, tableName, null);
++    }
++
++    /**
++     * Reads the column definitions for the indicated table.
++     * 
++     * @param metaData  The database meta data
++     * @param tableName The name of the table
++     * @param schemaName The name of the table's schema
++     * @return The columns
++     */
++    protected Collection readColumns(DatabaseMetaDataWrapper metaData, String tableName, String schemaName) throws SQLException
++    {
+         ResultSet columnData = null;
+ 
+         try
+         {
+-            columnData = metaData.getColumns(metaData.escapeForSearch(tableName), getDefaultColumnPattern());
++            columnData = (schemaName == null) ? metaData.getColumns(tableName, getDefaultColumnPattern()) :
++        	metaData.getColumns(tableName, schemaName, getDefaultColumnPattern());
+ 
+             List columns = new ArrayList();
+ 
+@@ -843,20 +866,35 @@
+     }
+ 
+     /**
++     * Retrieves the names of the columns that make up the primary key for a given table and schema.
++     *
++     * @param metaData  The database meta data
++     * @param tableName The name of the table from which to retrieve PK information
++     * @param schemaName The name of the table's schema.
++     * @return The primary key column names
++     */
++    protected Collection readPrimaryKeyNames(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException 
++    {
++	return readPrimaryKeyNames(metaData, tableName, null);
++    }
++    
++    /**
+      * Retrieves the names of the columns that make up the primary key for a given table.
+      *
+      * @param metaData  The database meta data
+      * @param tableName The name of the table from which to retrieve PK information
+      * @return The primary key column names
+      */
+-    protected Collection readPrimaryKeyNames(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException
++    protected Collection readPrimaryKeyNames(DatabaseMetaDataWrapper metaData, String tableName, String schemaName) throws SQLException
+     {
+         List      pks   = new ArrayList();
+         ResultSet pkData = null;
+ 
+         try
+         {
+-            pkData = metaData.getPrimaryKeys(metaData.escapeForSearch(tableName));
++            pkData = (schemaName == null) ? metaData.getPrimaryKeys(tableName) :
++        	metaData.getPrimaryKeys(tableName, schemaName);
++            
+             while (pkData.next())
+             {
+                 Map values = readColumns(pkData, getColumnsForPK());
+@@ -892,12 +930,26 @@
+      */
+     protected Collection readForeignKeys(DatabaseMetaDataWrapper metaData, String tableName) throws SQLException
+     {
++	return readForeignKeys(metaData, tableName, null);
++    }
++    
++    /**
++     * Retrieves the foreign keys of the indicated table and schema.
++     *
++     * @param metaData  The database meta data
++     * @param tableName The name of the table from which to retrieve FK information
++     * @param schemaName The schema of the table
++     * @return The foreign keys
++     */
++    protected Collection readForeignKeys(DatabaseMetaDataWrapper metaData, String tableName, String schemaName) throws SQLException
++    {
+         Map       fks    = new ListOrderedMap();
+         ResultSet fkData = null;
+ 
+         try
+         {
+-            fkData = metaData.getForeignKeys(metaData.escapeForSearch(tableName));
++            fkData = (schemaName == null) ? metaData.getForeignKeys(tableName) :
++        	    metaData.getForeignKeys(tableName, schemaName);
+ 
+             while (fkData.next())
+             {
+@@ -1123,6 +1175,21 @@
+             }
+         }
+         query.append(" FROM ");
++        // add table schema if it's defined
++        if (table.getSchema() != null) 
++        {
++            if (getPlatform().isDelimitedIdentifierModeOn()) 
++            {
++        	query.append(getPlatformInfo().getDelimiterToken());
++            }
++            query.append(table.getSchema());
++            if (getPlatform().isDelimitedIdentifierModeOn()) 
++            {
++        	query.append(getPlatformInfo().getDelimiterToken());
++            }
++            // TODO: make this configurable
++            query.append(".");
++        }
+         if (getPlatform().isDelimitedIdentifierModeOn())
+         {
+             query.append(getPlatformInfo().getDelimiterToken());
+Index: src/main/resources/database.xsd
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
