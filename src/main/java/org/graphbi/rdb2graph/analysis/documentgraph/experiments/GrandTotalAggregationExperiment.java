@@ -1,9 +1,5 @@
 package org.graphbi.rdb2graph.analysis.documentgraph.experiments;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;

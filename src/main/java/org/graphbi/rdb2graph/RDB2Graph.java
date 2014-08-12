@@ -1,12 +1,7 @@
 package org.graphbi.rdb2graph;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
@@ -16,19 +11,13 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.io.FileUtils;
 import org.apache.ddlutils.Platform;
 import org.apache.ddlutils.io.DatabaseIO;
 import org.apache.ddlutils.model.Database;
 import org.apache.log4j.Logger;
-import org.graphbi.rdb2graph.analysis.Experiment;
 import org.graphbi.rdb2graph.analysis.documentgraph.DocGraph;
 import org.graphbi.rdb2graph.analysis.documentgraph.DocGraphDuplicator;
 import org.graphbi.rdb2graph.analysis.documentgraph.DocGraphExtractor;
-import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.AnalyzerResult;
-import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.DocGraphMeasureFunction;
-import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.NumericalAggregation;
 import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.StatisticsLogger;
 import org.graphbi.rdb2graph.analysis.documentgraph.experiments.GrandTotalAggregationExperiment;
 import org.graphbi.rdb2graph.analysis.documentgraph.experiments.ResourceInvolvementExperiment;

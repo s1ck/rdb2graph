@@ -1,9 +1,5 @@
 package org.graphbi.rdb2graph.analysis.documentgraph.experiments;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +9,6 @@ import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
 import org.graphbi.rdb2graph.analysis.Experiment;
 import org.graphbi.rdb2graph.analysis.documentgraph.DocGraph;
-import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.AnalyzerResult;
 import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.DocGraphFilterFunction;
 import org.graphbi.rdb2graph.analysis.documentgraph.analyzer.ResourceInvolvementExtractor;
 import org.graphbi.rdb2graph.util.config.Constants;
