@@ -6,19 +6,19 @@ import org.graphbi.rdb2graph.util.graph.impl.Neo4jGraph;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 public abstract class NeoDocGraphMeasureFunction<T> implements
-	DocGraphMeasureFunction<T> {
+		DocGraphMeasureFunction<T> {
 
-    protected final GraphDatabaseService graph;
+	protected final GraphDatabaseService graph;
 
-    public NeoDocGraphMeasureFunction(ReadOnlyGraph graph) {
-	if (!(graph instanceof Neo4jGraph)) {
-	    throw new IllegalArgumentException(
-		    "graph must be instance of Neo4jGraph");
+	public NeoDocGraphMeasureFunction(ReadOnlyGraph graph) {
+		if (!(graph instanceof Neo4jGraph)) {
+			throw new IllegalArgumentException(
+					"graph must be instance of Neo4jGraph");
+		}
+		this.graph = ((Neo4jGraph) graph).getGraphDB();
 	}
-	this.graph = ((Neo4jGraph) graph).getGraphDB();
-    }
 
-    public NeoDocGraphMeasureFunction(GraphDatabaseService graph) {
-	this.graph = graph;
-    }
+	public NeoDocGraphMeasureFunction(GraphDatabaseService graph) {
+		this.graph = graph;
+	}
 }

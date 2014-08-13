@@ -104,9 +104,9 @@ public class NeoResourceInvolvementExtractor implements
 										validPath = false;
 										break;
 									}
-									r = String.format("%s-%s->%s", r,
-											e.getType().name(),
-											getNodeClass(e.getEndNode()));
+									r = String.format("%s-%s->%s", r, e
+											.getType().name(), getNodeClass(e
+											.getEndNode()));
 									v_p = e.getEndNode();
 								} else {
 									if (getNodeSuperClass(e.getStartNode())
@@ -114,9 +114,9 @@ public class NeoResourceInvolvementExtractor implements
 										validPath = false;
 										break;
 									}
-									r = String.format("%s<-%s-%s", r,
-											e.getType().name(),
-											getNodeClass(e.getStartNode()));
+									r = String.format("%s<-%s-%s", r, e
+											.getType().name(), getNodeClass(e
+											.getStartNode()));
 									v_p = e.getStartNode();
 								}
 							}
