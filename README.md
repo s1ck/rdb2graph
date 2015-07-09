@@ -42,9 +42,26 @@ Run:
 
 * copy resources/sakila-sample-config.properties to resources/config.properties and look inside for details
 
-`mvn exec:exec -Dexec.executable="java"` to see the available options
-`mvn exec:exec -Dexec.executable="java" -Dexec.args="-c config.xml"` to apply your own config xml (default is resources/config.xml)
-`mvn exec:exec -Dexec.executable="java" -Dexec.args="-e ddl.xml"` to extract the database schema into ddl.xml
-`mvn exec:exec -Dexec.executable="java" -Dexec.args="-t"` to transform the relational database form source system to target system
-`mvn exec:exec -Dexec.executable="java" -Dexec.args="-r erpnext-sample-ddl.xml -t"` to read the schema from a local file instead of the live database
-`mvn exec:exec -Dexec.executable="java" -Dexec.args="-r erpnext-sample-ddl.xml -a opgraph"` to read the schema from a local file and analyze the graph for operation graphs
+* list available options
+
+`mvn exec:exec -Dexec.executable="java"`
+
+* apply your own config xml (default is resources/config.xml)
+
+`mvn exec:exec -Dexec.executable="java" -Dexec.args="-c config.xml"` 
+
+* extract the database schema into ddl.xml
+
+`mvn exec:exec -Dexec.executable="java" -Dexec.args="-e ddl.xml"`
+
+* transform the relational database form source system to target system
+
+`mvn exec:exec -Dexec.executable="java" -Dexec.args="-t"`
+
+* read the schema from a local file instead of the live database
+
+`mvn exec:exec -Dexec.executable="java" -Dexec.args="-r erpnext-sample-ddl.xml -t"`
+
+* read the schema from a local file and analyze the graph for operation graphs
+
+`mvn exec:exec -Dexec.executable="java" -Dexec.args="-r erpnext-sample-ddl.xml -a opgraph"`
