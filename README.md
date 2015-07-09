@@ -11,7 +11,7 @@ and relationships.
 Currently, the tool supports MySQL as a source database system and Neo4j as a target system. The architecture is flexible and can be easily
 extended by implementing some predefined interfaces.
 
-### Build and run
+#### Build
 
 * clone rdb2graph project
 
@@ -22,11 +22,13 @@ To run properly, ddl utils needed to be patched.
 * checkout ddlutils from their svn
 
 `svn co http://svn.apache.org/repos/asf/db/ddlutils/trunk ddlutils`
+
 `cd ddlutils`
 
 * apply patches
 
 `patch -p0 -i ../rdb2graph/doc/ddlutils_graphbi_patch/ddlutils_graphbi_2013-04-16.patch`
+
 `patch -p0 --binary -i ../rdb2graph/doc/ddlutils_graphbi_patch/ddlutils_graphbi_2014-08-04.patch`
 
 * build and install ddl utils
@@ -36,9 +38,10 @@ To run properly, ddl utils needed to be patched.
 * build and install rdb2graph
 
 `cd ../rdb2graph`
+
 `mvn clean install`
 
-Run: 
+#### Run
 
 * copy resources/sakila-sample-config.properties to resources/config.properties and look inside for details
 
