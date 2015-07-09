@@ -6,6 +6,9 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<properties>
+		<ddlutils-version>1.1</ddlutils-version>
+		<log4j-version>1.2.17</log4j-version>
+		<mysql-version>5.1.23</mysql-version>
 		<neo4j-version>2.0.1</neo4j-version>
 	</properties>
 
@@ -14,12 +17,12 @@
 		<dependency>
 			<groupId>org.apache.ddlutils</groupId>
 			<artifactId>ddlutils</artifactId>
-			<version>1.1</version>
+			<version>${ddlutils-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.23</version>
+			<version>${mysql-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.neo4j</groupId>
@@ -36,12 +39,7 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
-		</dependency>
-		<dependency>
-			<groupId>com.microsoft.sqlserver</groupId>
-			<artifactId>sqljdbc4</artifactId>
-			<version>4.0</version>
+			<version>${log4j-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-cli</groupId>

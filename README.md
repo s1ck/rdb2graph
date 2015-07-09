@@ -1,5 +1,5 @@
-rdb2graph - Relational Database To Property Graph Converter and Analysis Tool
-=============================================================================
+## rdb2graph - Relational Database To Property Graph Converter and Analysis Tool
+
 
 *rdb2graph can be used to convert a relational database on-line into a property graph model and store it in a graph database*
 
@@ -11,30 +11,40 @@ and relationships.
 Currently, the tool supports MySQL as a source database system and Neo4j as a target system. The architecture is flexible and can be easily
 extended by implementing some predefined interfaces.
 
-Usage
------
+### Build and run
 
-Config: 
+* clone rdb2graph project
 
-* copy resources/sakila-sample-config.properties to resources/config.properties and look inside for details
+`git clone https://github.com/s1ck/rdb2graph`
 
-Install: 
+To run properly, ddl utils needed to be patched.
 
-Microsoft SQL JDBC Driver (in case you haven't installed)
+* checkout ddlutils from their svn
 
-* download from [Microsoft](http://msdn.microsoft.com/en-us/sqlserver/aa937724.aspx)
-* unpack sqljdbc4.jar
-* `mvn install:install-file -Dfile=sqljdbc4.jar -DgroupId=com.microsoft.sqlserver -DartifactId=sqljdbc4 -Dversion=4.0 -Dpackaging=jar`
+`svn co http://svn.apache.org/repos/asf/db/ddlutils/trunk ddlutils`
+`cd ddlutils`
 
-rdb2graph 
+* apply patches
 
-* `mvn clean install`
+`patch -p0 -i ../rdb2graph/doc/ddlutils_graphbi_patch/ddlutils_graphbi_2013-04-16.patch`
+`patch -p0 --binary -i ../rdb2graph/doc/ddlutils_graphbi_patch/ddlutils_graphbi_2014-08-04.patch`
+
+* build and install ddl utils
+
+`mvn clean install`
+
+* build and install rdb2graph
+
+`cd ../rdb2graph`
+`mvn clean install`
 
 Run: 
 
-* `mvn exec:exec -Dexec.executable="java"` to see the available options
-* `mvn exec:exec -Dexec.executable="java" -Dexec.args="-c config.xml"` to apply your own config xml (default is resources/config.xml)
-* `mvn exec:exec -Dexec.executable="java" -Dexec.args="-e ddl.xml"` to extract the database schema into ddl.xml
-* `mvn exec:exec -Dexec.executable="java" -Dexec.args="-t"` to transform the relational database form source system to target system
-* `mvn exec:exec -Dexec.executable="java" -Dexec.args="-r erpnext-sample-ddl.xml -t"` to read the schema from a local file instead of the live database
-* `mvn exec:exec -Dexec.executable="java" -Dexec.args="-r erpnext-sample-ddl.xml -a opgraph"` to read the schema from a local file and analyze the graph for operation graphs
+* copy resources/sakila-sample-config.properties to resources/config.properties and look inside for details
+
+`mvn exec:exec -Dexec.executable="java"` to see the available options
+`mvn exec:exec -Dexec.executable="java" -Dexec.args="-c config.xml"` to apply your own config xml (default is resources/config.xml)
+`mvn exec:exec -Dexec.executable="java" -Dexec.args="-e ddl.xml"` to extract the database schema into ddl.xml
+`mvn exec:exec -Dexec.executable="java" -Dexec.args="-t"` to transform the relational database form source system to target system
+`mvn exec:exec -Dexec.executable="java" -Dexec.args="-r erpnext-sample-ddl.xml -t"` to read the schema from a local file instead of the live database
+`mvn exec:exec -Dexec.executable="java" -Dexec.args="-r erpnext-sample-ddl.xml -a opgraph"` to read the schema from a local file and analyze the graph for operation graphs
