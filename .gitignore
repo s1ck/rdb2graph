@@ -1,5 +1,4 @@
 .idea
-.iml
 .classpath
 .project
 .settings/
@@ -7,3 +6,4 @@ target/
 bin/
 config.xml
 *~
+*.iml
